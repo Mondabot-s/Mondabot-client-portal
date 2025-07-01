@@ -4,30 +4,10 @@ import React from 'react';
 import { useProjects } from '@/hooks/useProjects';
 import { ServerStatus } from '@/components/ServerStatus';
 import { format, parseISO } from 'date-fns';
+import { getStatusStyles } from '@/utils/statusTheme';
 
 const TestPage: React.FC = () => {
   const { projects, loading, error, refetch, socketConnected } = useProjects();
-
-  const getStatusStyles = (status: string) => {
-    const styles = {
-      Building: {
-        bg: 'bg-orange-100',
-        text: 'text-orange-800',
-        border: 'border-orange-300'
-      },
-      Live: {
-        bg: 'bg-green-100',
-        text: 'text-green-800',
-        border: 'border-green-300'
-      },
-      Testing: {
-        bg: 'bg-blue-100',
-        text: 'text-blue-800',
-        border: 'border-blue-300'
-      }
-    };
-    return styles[status as keyof typeof styles] || styles.Building;
-  };
 
   if (loading) {
     return (
@@ -103,7 +83,9 @@ const TestPage: React.FC = () => {
                         {project.projectId}
                       </p>
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyle.bg} ${statusStyle.text} border ${statusStyle.border}`}>
+                    <span 
+                      className={`${statusStyle.bg} ${statusStyle.text} ${statusStyle.border} px-3 py-1 rounded-full text-xs font-semibold`}
+                    >
                       {project.status.toUpperCase()}
                     </span>
                   </div>

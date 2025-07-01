@@ -89,3 +89,21 @@ body {
 .text-dark {
   color: var(--theme-text-dark);
 }
+
+/* Custom colors for easy use in Tailwind */
+.bg-status-building { background-color: #EC4899; } /* Pink */
+.bg-status-testing { background-color: #007AFF; } /* Blue */
+.bg-status-review { background-color: #FF6B35; } /* Orange-Red */
+.bg-status-live { background-color: #34C759; }   /* Green */
+
+.text-status-building { color: #EC4899; } /* Pink */
+.text-status-testing { color: #007AFF; } /* Blue */
+.text-status-review { color: #FF6B35; } /* Orange-Red */
+.text-status-live { color: #34C759; }   /* Green */
+
+.border-status-building { border-color: #EC4899; } /* Pink */
+.border-status-testing { border-color: #007AFF; } /* Blue */
+.border-status-review { border-color: #FF6B35; } /* Orange-Red */
+.border-status-live { border-color: #34C759; }   /* Green */
+
+/* Removed problematic status badge utilities that reference non-existent Tailwind classes */

@@ -162,6 +162,10 @@ app.get('/api/test-projects', async (req, res) => {
 app.get('/api/projects', async (req, res) => {
   console.log('\n📋 GET /api/projects called');
   
+  // Read the sortBy query parameter from the request
+  const { sortBy } = req.query;
+  console.log('   Sort parameter:', sortBy || 'default');
+  
   // Check if Airtable is initialized
   if (!base) {
     console.error('❌ Airtable not initialized');
@@ -184,22 +188,51 @@ app.get('/api/projects', async (req, res) => {
     console.log('   Base ID:', process.env.AIRTABLE_BASE_ID);
     console.log('   Table: Projects (or tblJCWNtJPspIxcDC)');
     
+    // Prepare the sort options for the Airtable API call
+    const sortOptions = [];
+    switch (sortBy) {
+      case 'name':
+        // Use the actual field name from your Airtable base
+        sortOptions.push({ field: 'Project Name', direction: 'asc' });
+        break;
+      case 'status':
+        sortOptions.push({ field: 'Status', direction: 'asc' });
+        break;
+      case 'deadline':
+        sortOptions.push({ field: 'Deadline', direction: 'asc' });
+        break;
+      default:
+        // Default sort - no specific sort order (Airtable default)
+        break;
+    }
+    
     let records;
     
     // Try with table name first
     try {
-      records = await base('Projects').select({
-        maxRecords: 100,
-        view: 'Grid view'
-      }).all();
+      const selectOptions = {
+        maxRecords: 100
+      };
+      // Add sort options if specified
+      if (sortOptions.length > 0) {
+        selectOptions.sort = sortOptions;
+      }
+      
+      records = await base('Projects').select(selectOptions).all();
       console.log('✅ Fetched using table name "Projects"');
     } catch (nameError) {
       if (nameError.statusCode === 404) {
         console.log('⚠️  Table name "Projects" not found, trying table ID...');
         // Try with table ID
-        records = await base('tblJCWNtJPspIxcDC').select({
+        const selectOptions = {
           maxRecords: 100
-        }).all();
+        };
+        // Add sort options if specified
+        if (sortOptions.length > 0) {
+          selectOptions.sort = sortOptions;
+        }
+        
+        records = await base('tblJCWNtJPspIxcDC').select(selectOptions).all();
         console.log('✅ Fetched using table ID "tblJCWNtJPspIxcDC"');
       } else {
         throw nameError;
@@ -207,6 +240,9 @@ app.get('/api/projects', async (req, res) => {
     }
     
     console.log(`✅ Successfully fetched ${records.length} records`);
+    if (sortOptions.length > 0) {
+      console.log(`   Applied sort: ${sortOptions.map(s => `${s.field} (${s.direction})`).join(', ')}`);
+    }
     
     // Map records - try both field names and field IDs
     const projects = records.map(record => {
@@ -263,32 +299,99 @@ app.get('/api/projects', async (req, res) => {
   }
 });
 
-// Tasks endpoint (similar pattern)
+// Tasks endpoint with proper field mapping
 app.get('/api/tasks', async (req, res) => {
+  console.log('\n📋 GET /api/tasks called');
+  
   if (!base) {
+    console.error('❌ Airtable not initialized');
+    
+    const missingItems = [];
+    if (!Airtable) missingItems.push('Airtable module (run: npm install airtable)');
+    if (!process.env.AIRTABLE_API_KEY) missingItems.push('AIRTABLE_API_KEY in .env file');
+    if (!process.env.AIRTABLE_BASE_ID) missingItems.push('AIRTABLE_BASE_ID in .env file');
+    
     return res.status(503).json({
       error: 'Airtable not configured',
-      message: 'The server is running but Airtable is not properly configured'
+      message: 'The server is running but Airtable is not properly configured',
+      missing: missingItems,
+      help: 'Please check server console for details'
     });
   }
   
   try {
+    console.log('🔄 Attempting to fetch tasks from Airtable...');
+    console.log('   Base ID:', process.env.AIRTABLE_BASE_ID);
+    console.log('   Table ID: tblTu01GpPvZM70Hw');
+    
     const records = await base('tblTu01GpPvZM70Hw').select({
       maxRecords: 100
     }).all();
     
-    const tasks = records.map(record => ({
-      id: record.id,
-      ...record.fields
-    }));
+    console.log(`✅ Successfully fetched ${records.length} task records`);
+    
+    // Map records with proper field handling - try both field names and field IDs
+    const tasks = records.map(record => {
+      const getField = (fieldName, fieldId, defaultValue = null) => {
+        return record.get(fieldName) || record.get(fieldId) || defaultValue;
+      };
+      
+      const task = {
+        id: record.id,
+        'Task Name': getField('Task Name', 'fld0BQXbL0G5dfl7z', 'Unnamed Task'),
+        'Status': getField('Status', 'fldfbAZh2JMnYAN9f', 'To Do'),
+        'ID': getField('ID', 'flduiMhOfkMlvyU4B', null),
+        'Projects': getField('Projects', 'fldOQNniyKq2irRQf', [])
+      };
+      
+      // Log first few records for debugging
+      if (records.indexOf(record) < 3) {
+        console.log(`   Task ${records.indexOf(record) + 1}:`, {
+          id: task.id,
+          name: task['Task Name'],
+          status: task['Status'],
+          projects: task['Projects']
+        });
+      }
+      
+      return task;
+    });
     
     res.json(tasks);
+    
   } catch (error) {
-    console.error('Error fetching tasks:', error);
-    res.status(500).json({
-      error: 'Failed to fetch tasks',
-      message: error.message
-    });
+    console.error('❌ Airtable tasks request failed:', error);
+    
+    // Detailed error response
+    const errorResponse = {
+      error: 'Airtable tasks request failed',
+      message: error.message,
+      type: error.constructor.name
+    };
+    
+    if (error.statusCode) {
+      errorResponse.statusCode = error.statusCode;
+      
+      switch (error.statusCode) {
+        case 401:
+          errorResponse.help = 'Invalid API key. Check AIRTABLE_API_KEY in .env file';
+          break;
+        case 403:
+          errorResponse.help = 'API key does not have access to this base';
+          break;
+        case 404:
+          errorResponse.help = 'Base or table not found. Verify base ID and table ID tblTu01GpPvZM70Hw';
+          break;
+        case 422:
+          errorResponse.help = 'Invalid request format';
+          break;
+        case 429:
+          errorResponse.help = 'Rate limited. Wait 30 seconds';
+          break;
+      }
+    }
+    
+    res.status(error.statusCode || 500).json(errorResponse);
   }
 });
 
@@ -329,6 +432,82 @@ app.post('/api/webhooks/airtable-projects', (req, res) => {
       message: 'Error processing webhook',
       error: error.message 
     });
+  }
+});
+
+// Project details endpoint
+app.get('/api/projects/:id', async (req, res) => {
+  console.log(`\n📋 GET /api/projects/${req.params.id} called`);
+  
+  if (!base) {
+    return res.status(503).json({
+      error: 'Airtable not configured',
+      message: 'The server is running but Airtable is not properly configured'
+    });
+  }
+  
+  try {
+    console.log('🔄 Attempting to fetch project from Airtable...');
+    console.log('   Project ID:', req.params.id);
+    
+    let record;
+    
+    // Try with table name first
+    try {
+      record = await base('Projects').find(req.params.id);
+      console.log('✅ Fetched using table name "Projects"');
+    } catch (nameError) {
+      if (nameError.statusCode === 404) {
+        console.log('⚠️  Table name "Projects" not found, trying table ID...');
+        // Try with table ID
+        record = await base('tblJCWNtJPspIxcDC').find(req.params.id);
+        console.log('✅ Fetched using table ID "tblJCWNtJPspIxcDC"');
+      } else {
+        throw nameError;
+      }
+    }
+    
+    console.log('✅ Successfully fetched project record');
+    
+    // Map record - try both field names and field IDs
+    const getField = (fieldName, fieldId, defaultValue = '') => {
+      return record.get(fieldName) || record.get(fieldId) || defaultValue;
+    };
+    
+    const project = {
+      id: record.id,
+      projectId: getField('Project ID', 'fldt2uqsBAs8iQlyL', ''),
+      name: getField('Project Name', 'fldV9xdwcDkMt9dNO', 'Unnamed Project'),
+      status: getField('Status', 'fld94mbrM8R9c8apl', 'Building'),
+      deadline: getField('Deadline', 'fld6BTXsUHNTWYlrv', null),
+      assignedManager: getField('Manager (from Assigned Manager)', 'fldmBfIV2rtlr4ZWB', []),
+      tasks: getField('Tasks', 'fld5lb8nCSK4xBPo5', [])
+    };
+    
+    res.json(project);
+    
+  } catch (error) {
+    console.error('❌ Airtable project request failed:', error);
+    
+    if (error.statusCode === 404) {
+      return res.status(404).json({
+        error: 'Project not found',
+        message: `Project with ID ${req.params.id} was not found`
+      });
+    }
+    
+    // Detailed error response
+    const errorResponse = {
+      error: 'Airtable project request failed',
+      message: error.message,
+      type: error.constructor.name
+    };
+    
+    if (error.statusCode) {
+      errorResponse.statusCode = error.statusCode;
+    }
+    
+    res.status(error.statusCode || 500).json(errorResponse);
   }
 });
 
