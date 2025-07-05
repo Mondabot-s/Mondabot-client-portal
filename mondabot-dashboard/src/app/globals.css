@@ -11,6 +11,13 @@
   --theme-text-muted: #4a5568;
   --font-family-sans: 'Inter', sans-serif;
   --brand-primary: #170F3A;
+  --brand-secondary: #d90077;
+  --brand-dark: #0a0a2a;
+  --brand-light: #ffffff;
+  --brand-background: #f8f9fc;
+  --text-primary: #1a1a1a;
+  --text-secondary: #6b7280;
+  --border-color: #e5e7eb;
 }
 
 @theme inline {
@@ -19,6 +26,7 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --color-brand-primary: var(--brand-primary);
+  --color-brand-secondary: var(--brand-secondary);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -43,6 +51,70 @@ body {
 
 .sidebar-background {
   background-color: #FFFFFF;
+}
+
+/* Enhanced Brand Color Utilities */
+.bg-brand-primary {
+  background-color: var(--brand-primary);
+}
+
+.bg-brand-secondary {
+  background-color: var(--brand-secondary);
+}
+
+.bg-brand-dark {
+  background-color: var(--brand-dark);
+}
+
+.text-brand-primary {
+  color: var(--brand-primary);
+}
+
+.text-brand-secondary {
+  color: var(--brand-secondary);
+}
+
+.border-brand-primary {
+  border-color: var(--brand-primary);
+}
+
+.border-brand-secondary {
+  border-color: var(--brand-secondary);
+}
+
+.ring-brand-primary {
+  --tw-ring-color: var(--brand-primary);
+}
+
+.ring-brand-secondary {
+  --tw-ring-color: var(--brand-secondary);
+}
+
+.focus\:ring-brand-primary:focus {
+  --tw-ring-color: var(--brand-primary);
+}
+
+.focus\:ring-brand-secondary:focus {
+  --tw-ring-color: var(--brand-secondary);
+}
+
+.hover\:bg-brand-primary-dark:hover {
+  background-color: #b80062;
+}
+
+.hover\:bg-brand-secondary-dark:hover {
+  background-color: #b80062;
+}
+
+/* Progress Bar Styling */
+.progress-bar {
+  background-color: var(--brand-secondary);
+}
+
+/* Project Tag Styling */
+.project-tag {
+  background-color: rgba(217, 0, 119, 0.1);
+  color: var(--brand-secondary);
 }
 
 /* Kanban Board Styles */
@@ -108,9 +180,7 @@ body {
 .border-status-review { border-color: #FF6B35; } /* Orange-Red */
 .border-status-live { border-color: #34C759; }   /* Green */
 
-/* Removed problematic status badge utilities that reference non-existent Tailwind classes */
-
-/* Premium Dashboard Animations */
+/* Enhanced Animations */
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -122,17 +192,57 @@ body {
   }
 }
 
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .animate-fade-in {
   animation: fade-in 0.2s ease-out;
 }
 
-/* Project Card Hover Effects */
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.2s ease-out;
+}
+
+/* Enhanced Card Hover Effects */
 .project-card {
   transition: all 0.2s ease-in-out;
 }
 
 .project-card:hover {
   transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.stats-card {
+  transition: all 0.2s ease-in-out;
+}
+
+.stats-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .progress-fill {
@@ -149,25 +259,36 @@ body {
   display: none;
 }
 
-/* Brand Color Utilities */
-.bg-brand-primary {
-  background-color: var(--brand-primary);
+/* Video Container Styling */
+.video-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
 }
 
-.text-brand-primary {
-  color: var(--brand-primary);
+.video-container iframe {
+  border-radius: 8px;
 }
 
-.border-brand-primary {
-  border-color: var(--brand-primary);
+/* Alert Styling */
+.alert-warning {
+  background-color: #fef3c7;
+  border-left-color: #f59e0b;
 }
 
-.ring-brand-primary {
-  --tw-ring-color: var(--brand-primary);
+.alert-info {
+  background-color: #dbeafe;
+  border-left-color: #3b82f6;
 }
 
-.focus\:ring-brand-primary:focus {
-  --tw-ring-color: var(--brand-primary);
+.alert-success {
+  background-color: #d1fae5;
+  border-left-color: #10b981;
+}
+
+.alert-error {
+  background-color: #fee2e2;
+  border-left-color: #ef4444;
 }
 
 /* Clerk Integration Styles */
@@ -194,74 +315,66 @@ body {
 .clerk-signin-container input:focus,
 .clerk-signup-container input:focus {
   outline: none !important;
-  ring: 2px solid #d90077 !important;
+  ring: 2px solid var(--brand-secondary) !important;
   border-color: transparent !important;
 }
 
-/* Ensure Clerk buttons maintain the branded styling */
 .clerk-signin-container button[type="submit"],
 .clerk-signup-container button[type="submit"] {
-  background: linear-gradient(to right, #d90077, #ff1493) !important;
-  border: none !important;
-  border-radius: 0.75rem !important;
+  background-color: var(--brand-secondary) !important;
   color: white !important;
-  font-weight: 500 !important;
-  transition: all 0.2s ease !important;
+  border: none !important;
+  padding: 12px 24px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
 }
 
 .clerk-signin-container button[type="submit"]:hover,
 .clerk-signup-container button[type="submit"]:hover {
-  background: linear-gradient(to right, #b80062, #e91e63) !important;
-  transform: scale(1.02) !important;
+  background-color: #b80062 !important;
 }
 
-/* Ensure OAuth buttons maintain consistent styling */
 .clerk-signin-container .cl-socialButtonsBlockButton,
 .clerk-signup-container .cl-socialButtonsBlockButton {
-  border: 1px solid #d1d5db !important;
-  border-radius: 0.75rem !important;
-  background: white !important;
+  border: 1px solid #e5e7eb !important;
+  background-color: white !important;
   color: #374151 !important;
-  transition: all 0.2s ease !important;
+  border-radius: 8px !important;
+  padding: 12px 24px !important;
 }
 
 .clerk-signin-container .cl-socialButtonsBlockButton:hover,
 .clerk-signup-container .cl-socialButtonsBlockButton:hover {
-  background: #f9fafb !important;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+  background-color: #f9fafb !important;
 }
 
-/* Ensure error messages and alerts maintain consistent styling */
 .clerk-signin-container .cl-alert,
 .clerk-signup-container .cl-alert {
-  border-radius: 0.75rem !important;
-  padding: 0.75rem !important;
+  border-radius: 8px !important;
+  padding: 12px !important;
 }
 
 .clerk-signin-container .cl-alert--error,
 .clerk-signup-container .cl-alert--error {
-  background: #fef2f2 !important;
-  border: 1px solid #fecaca !important;
-  color: #dc2626 !important;
+  background-color: #fee2e2 !important;
+  border-left: 4px solid #ef4444 !important;
+  color: #991b1b !important;
 }
 
 .clerk-signin-container .cl-alert--success,
 .clerk-signup-container .cl-alert--success {
-  background: #f0fdf4 !important;
-  border: 1px solid #bbf7d0 !important;
-  color: #16a34a !important;
+  background-color: #d1fae5 !important;
+  border-left: 4px solid #10b981 !important;
+  color: #065f46 !important;
 }
 
-/* Ensure links maintain the branded color */
 .clerk-signin-container a,
 .clerk-signup-container a {
-  color: #d90077 !important;
+  color: var(--brand-secondary) !important;
   text-decoration: none !important;
-  transition: color 0.2s ease !important;
 }
 
 .clerk-signin-container a:hover,
 .clerk-signup-container a:hover {
-  color: #b80062 !important;
   text-decoration: underline !important;
 }

@@ -4,9 +4,9 @@ WORKDIR /app
 COPY package*.json ./
 COPY server/package*.json ./server/
 COPY mondabot-dashboard/package*.json ./mondabot-dashboard/
-RUN npm ci --only=production
-RUN cd server && npm ci --only=production
-RUN cd mondabot-dashboard && npm ci --only=production
+RUN npm ci --omit=dev
+RUN cd server && npm ci --omit=dev
+RUN cd mondabot-dashboard && npm ci --omit=dev
 
 FROM node:18-alpine AS builder
 WORKDIR /app
@@ -35,12 +35,14 @@ COPY --from=builder /app/mondabot-dashboard/.next/static ./mondabot-dashboard/.n
 COPY --from=builder /app/server ./server
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/server/node_modules ./server/node_modules
+COPY --from=deps /app/mondabot-dashboard/node_modules ./mondabot-dashboard/node_modules
 
-# Copy start script
+# Copy start script and package.json
 COPY --from=builder /app/scripts ./scripts
+COPY --from=builder /app/package.json ./package.json
 
 USER nextjs
 
-EXPOSE 3001
+EXPOSE 3000
 
 CMD ["node", "scripts/start-production.js"] 
