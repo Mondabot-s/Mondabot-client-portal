@@ -1,5 +1,7 @@
 # Mondabot Dashboard - Complete Technical Documentation
 
+> **Note for Development Team & AI Assistants:** This document is the single source of truth for the Mondabot Dashboard project. All significant changes, architectural decisions, and feature development should align with the guidelines specified herein. Please review relevant sections before starting new work.
+
 > **Version**: 1.0.0  
 > **Last Updated**: June 2025  
 > **Author**: Development Team  
@@ -7,17 +9,18 @@
 ## Table of Contents
 
 1. [System Overview](#system-overview)
-2. [Architecture](#architecture)
-3. [Backend Server](#backend-server)
-4. [Frontend Application](#frontend-application)
-5. [Airtable Integration](#airtable-integration)
-6. [Real-time Communication](#real-time-communication)
-7. [Environment Configuration](#environment-configuration)
-8. [Development Setup](#development-setup)
-9. [Production Deployment](#production-deployment)
-10. [API Reference](#api-reference)
-11. [Troubleshooting](#troubleshooting)
-12. [Maintenance & Monitoring](#maintenance--monitoring)
+2. [Brand Kit & Style Guide](#brand-kit--style-guide)
+3. [Architecture](#architecture)
+4. [Backend Server](#backend-server)
+5. [Frontend Application](#frontend-application)
+6. [Airtable Integration](#airtable-integration)
+7. [Real-time Communication](#real-time-communication)
+8. [Environment Configuration](#environment-configuration)
+9. [Development Setup](#development-setup)
+10. [Production Deployment](#production-deployment)
+11. [API Reference](#api-reference)
+12. [Troubleshooting](#troubleshooting)
+13. [Maintenance & Monitoring](#maintenance--monitoring)
 
 ---
 
@@ -53,6 +56,58 @@ The **Mondabot Dashboard** is a full-stack web application that provides real-ti
 - Docker (Containerization)
 - Railway (Production hosting)
 - GitHub (Version control & CI/CD)
+
+---
+
+## Brand Kit & Style Guide
+
+This section outlines the visual identity of the Mondabot Dashboard, ensuring a consistent and professional user experience.
+
+### Color Palette
+
+The color scheme is designed to be modern, clean, and accessible.
+
+| Role              | Hex Code  | Tailwind Class      | Description                               |
+|-------------------|-----------|---------------------|-------------------------------------------|
+| **Brand Primary** | `#170F3A` | `primary` / `brand-primary` | Main brand color for headers, logos, and key actions. |
+| **Brand Secondary**| `#2D1B69` | `brand-secondary`   | Accent color for secondary elements.      |
+| **Background**    | `#FFF9F9` | `background`        | Main page background color.               |
+| **Content Area**  | `#FFFFFF` | `content-bg`        | Background for cards and content sections.|
+| **Primary Text**  | `#1F2937` | `text-primary`      | For headings and primary content.         |
+| **Secondary Text**| `#6B7280` | `text-secondary`    | For subheadings, labels, and descriptions.|
+| **Icons**         | `#6B7280` | `icon-color`        | Default color for all UI icons.           |
+
+#### Status Colors
+
+Status colors provide immediate visual feedback on project states.
+
+| Status      | Hex Code  | Tailwind Class        |
+|-------------|-----------|-----------------------|
+| **Building**  | `#EC4899` | `status-building`     |
+| **Testing**   | `#007AFF` | `status-testing`      |
+| **Review**    | `#FF6B35` | `status-review`       |
+| **Live**      | `#34C759` | `status-live`         |
+
+#### Grayscale Palette
+
+A full grayscale palette is available for UI nuances, ranging from `gray-50` (`#F8FAFC`) to `gray-900` (`#0F172A`).
+
+### Typography
+
+- **Font Family**: `Poppins`, `sans-serif`
+- **Usage**: The `Poppins` font should be used for all text content to maintain a consistent and modern look.
+
+### Visual Elements
+
+- **Shadows**:
+  - `shadow-card`: `0 4px 6px rgba(0, 0, 0, 0.05)` - Standard card shadow.
+  - `shadow-card-hover`: `0 8px 25px rgba(0, 0, 0, 0.1)` - Enhanced shadow on hover.
+  - `shadow-premium`: `0 10px 40px rgba(23, 15, 58, 0.1)` - Used for prominent elements.
+
+- **Animations**:
+  - `slide-in`: A subtle slide-and-fade effect for appearing elements.
+  - `fade-in`: A simple fade effect for new content.
+  - `scale-in`: A scaling effect for modal dialogs or pop-ups.
 
 ---
 

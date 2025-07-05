@@ -12,9 +12,6 @@ import {
   Calendar,
   Target,
   Mail,
-  Phone,
-  MessageSquare,
-  User,
   FileText,
   Clock,
   ListChecks,
@@ -26,7 +23,7 @@ import { useUser } from '@clerk/nextjs';
 
 // Overview Section
 const OverviewSection = () => {
-  const { user, isLoaded } = useUser();
+  const { user } = useUser();
   
   // Get the user's first name, or default to 'Matthew'
   const firstName = (user?.firstName) || 'Matthew';
@@ -36,7 +33,7 @@ const OverviewSection = () => {
       {/* Welcome Message at Top */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome, {firstName}!</h1>
-        <p className="text-gray-600">Here's a quick overview of your active projects. Let's make some progress today.</p>
+        <p className="text-gray-600">Here&apos;s a quick overview of your active projects. Let&apos;s make some progress today.</p>
       </div>
 
       {/* Header with Search and Actions */}
@@ -165,7 +162,7 @@ const OverviewSection = () => {
               ></iframe>
             </div>
             <p className="text-sm text-text-secondary mt-2">
-              Watch how we're transforming your business processes with AI-powered automation
+              Watch how we&apos;re transforming your business processes with AI-powered automation
             </p>
           </Card>
         </div>

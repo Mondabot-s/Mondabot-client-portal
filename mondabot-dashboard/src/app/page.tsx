@@ -1,19 +1,16 @@
 "use client";
 
 import { useUser } from '@clerk/nextjs';
-import { Search, Bell, Plus, Play, MessageCircle, Calendar, AlertCircle, Target, Zap, CheckCircle, Clock, Database, ArrowUpRight, Mail, Users } from 'lucide-react';
+import { Bell, Plus, MessageCircle, AlertCircle, Zap, CheckCircle, Clock, Database, Mail } from 'lucide-react';
 import Image from 'next/image';
 
-export default function HomePage() {
-    // Check if Clerk is available and authentication is enabled
-    const isClerkAvailable = typeof window !== 'undefined' && 
-        process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-    
-    const isAuthEnabled = process.env.ENABLE_AUTHENTICATION === 'true';
-    
-    // Only use Clerk hooks if available and auth is enabled
-    const clerkUser = (isClerkAvailable && isAuthEnabled) ? useUser() : { user: null, isLoaded: true };
-    const { user, isLoaded } = clerkUser;
+const isClerkAvailable = typeof window !== 'undefined' && 
+    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+const isAuthEnabled = process.env.ENABLE_AUTHENTICATION === 'true';
+
+// A new component that uses hooks unconditionally
+const UserSpecificContent = () => {
+    const { user, isLoaded } = useUser();
 
     // Get user's first name with fallback
     const getUserFirstName = () => {
@@ -23,8 +20,7 @@ export default function HomePage() {
         return 'Matthew'; // Default fallback name
     };
 
-    // Show loading state only if auth is enabled and not loaded
-    if (isAuthEnabled && !isLoaded) {
+    if (!isLoaded) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="text-center">
@@ -36,14 +32,19 @@ export default function HomePage() {
             </div>
         );
     }
+    
+    return <HomePageContent userName={getUserFirstName()} />;
+}
 
+// The main page content, now receiving user name as a prop
+const HomePageContent = ({ userName }: { userName: string }) => {
     return (
         <>
             {/* Header */}
             <header className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between mb-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Welcome, {getUserFirstName()}</h1>
-                    <p className="text-gray-600 mt-1">Here's your automation empire at a glance.</p>
+                    <h1 className="text-3xl font-bold text-gray-900">Welcome, {userName}</h1>
+                    <p className="text-gray-600 mt-1">Here&apos;s your automation empire at a glance.</p>
                 </div>
                 <div className="flex items-center space-x-4 mt-4 sm:mt-0">
                     <button className="p-2 rounded-lg hover:bg-gray-100 transition">
@@ -108,7 +109,7 @@ export default function HomePage() {
                     <div className="bg-white rounded-xl overflow-hidden border border-gray-100">
                         <div className="p-5">
                             <h2 className="text-xl font-bold text-gray-900 mb-2">Your Automation Journey</h2>
-                            <p className="text-gray-600 mb-4">Watch how we're transforming your business processes with AI-powered automation.</p>
+                            <p className="text-gray-600 mb-4">Watch how we&apos;re transforming your business processes with AI-powered automation.</p>
                         </div>
                         <div className="aspect-video bg-black rounded-b-xl">
                             <iframe 
@@ -237,4 +238,13 @@ export default function HomePage() {
             </div>
         </>
     );
+}
+
+// The main export determines whether to use Clerk or not
+export default function HomePage() {
+    if (isClerkAvailable && isAuthEnabled) {
+        return <UserSpecificContent />;
+    }
+    // Render a default state if auth is disabled
+    return <HomePageContent userName="Matthew" />;
 } 
