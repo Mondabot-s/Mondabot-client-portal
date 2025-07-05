@@ -1,51 +1,46 @@
-# Use Node.js 18 Alpine for smaller image size
-FROM node:18-alpine
-
-# Set working directory
+# Multi-stage build for production
+FROM node:18-alpine AS deps
 WORKDIR /app
-
-# Install curl for health checks
-RUN apk add --no-cache curl
-
-# Copy package files for dependency installation
 COPY package*.json ./
-COPY mondabot-dashboard/package*.json ./mondabot-dashboard/
 COPY server/package*.json ./server/
+COPY mondabot-dashboard/package*.json ./mondabot-dashboard/
+RUN npm ci --only=production
+RUN cd server && npm ci --only=production
+RUN cd mondabot-dashboard && npm ci --only=production
 
-# Install ALL dependencies (including devDependencies for building)
-RUN npm install
-RUN cd mondabot-dashboard && npm install
-RUN cd server && npm install --production
-
-# Copy source code
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+COPY server/package*.json ./server/
+COPY mondabot-dashboard/package*.json ./mondabot-dashboard/
+RUN npm ci
+RUN cd server && npm ci
+RUN cd mondabot-dashboard && npm ci
 COPY . .
-
-# Build the Next.js frontend with standalone output
 RUN cd mondabot-dashboard && npm run build
 
-# Remove devDependencies after build to reduce image size
-RUN cd mondabot-dashboard && npm prune --production
+FROM node:18-alpine AS runner
+WORKDIR /app
 
-# Create a non-root user for security
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nextjs -u 1001
+ENV NODE_ENV production
+ENV RAILWAY_ENVIRONMENT production
 
-# Change ownership of the app directory to the nodejs user
-RUN chown -R nextjs:nodejs /app
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
 
-# Switch to non-root user
+# Copy built application
+COPY --from=builder /app/mondabot-dashboard/public ./mondabot-dashboard/public
+COPY --from=builder /app/mondabot-dashboard/.next/standalone ./mondabot-dashboard/.next/standalone
+COPY --from=builder /app/mondabot-dashboard/.next/static ./mondabot-dashboard/.next/static
+COPY --from=builder /app/server ./server
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/server/node_modules ./server/node_modules
+
+# Copy start script
+COPY --from=builder /app/scripts ./scripts
+
 USER nextjs
 
-# Expose ports for both services
-EXPOSE 3000 3001
+EXPOSE 3001
 
-# Health check - check the Express backend health endpoint
-HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-  CMD curl -f http://localhost:3001/health || exit 1
-
-# Set environment variables for production
-ENV NODE_ENV=production
-ENV RAILWAY_ENVIRONMENT=true
-
-# Start both services using the Railway start command
-CMD ["npm", "run", "railway:start"] 
+CMD ["node", "scripts/start-production.js"] 

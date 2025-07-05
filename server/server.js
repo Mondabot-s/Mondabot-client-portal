@@ -29,20 +29,22 @@ app.use(express.json());
 
 // CORS - Using the cors package for better compatibility
 const corsOptions = {
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:5173',
-    process.env.FRONTEND_URL,
-    process.env.RAILWAY_STATIC_URL,
-    process.env.RAILWAY_PUBLIC_DOMAIN,
-    // Allow Railway internal communication
-    'http://localhost:3000',
-    'https://*.railway.app'
-  ].filter(Boolean),
+  origin: process.env.NODE_ENV === 'production' 
+    ? [
+        process.env.FRONTEND_URL,
+        process.env.RAILWAY_STATIC_URL,
+        process.env.RAILWAY_PUBLIC_DOMAIN,
+        'https://*.railway.app'
+      ].filter(Boolean)
+    : [
+        'http://localhost:3000',
+        'http://localhost:3001',
+        'http://localhost:5173'
+      ],
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept'],
-  credentials: true
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
@@ -120,6 +122,25 @@ try {
   console.error('   Run: npm install socket.io');
 }
 
+// CRITICAL FIX: Proper static file serving for Next.js in production
+if (process.env.NODE_ENV === 'production') {
+  // Serve Next.js static files from the standalone build
+  const standaloneDir = path.join(__dirname, '..', 'mondabot-dashboard', '.next', 'standalone');
+  const staticDir = path.join(__dirname, '..', 'mondabot-dashboard', '.next', 'static');
+  const publicDir = path.join(__dirname, '..', 'mondabot-dashboard', 'public');
+
+  // Check if running in Railway with combined services
+  if (process.env.RAILWAY_ENVIRONMENT) {
+    console.log('🚂 Railway environment detected - configuring unified serving');
+    
+    // Serve Next.js static files
+    app.use('/_next/static', express.static(staticDir));
+    app.use('/public', express.static(publicDir));
+    
+    console.log('✅ Static file serving configured for Railway');
+  }
+}
+
 // Health check endpoint - ALWAYS WORKS
 app.get('/health', (req, res) => {
   console.log('Health check requested');
@@ -140,6 +161,17 @@ app.get('/health', (req, res) => {
       ready: !!io
     },
     server: 'express-backend'
+  });
+});
+
+// Add for debugging
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    backend: 'running',
+    port: process.env.PORT || 3001,
+    timestamp: new Date().toISOString(),
+    service: 'mondabot-backend-api'
   });
 });
 
@@ -615,6 +647,49 @@ app.use((err, req, res, next) => {
     message: err.message
   });
 });
+
+// IMPORTANT: Catch-all route for serving Next.js pages in production (Railway)
+if (process.env.NODE_ENV === 'production' && process.env.RAILWAY_ENVIRONMENT) {
+  const fs = require('fs');
+  
+  // Serve Next.js pages - this must be LAST
+  app.get('*', (req, res) => {
+    // Don't serve HTML for API routes
+    if (req.path.startsWith('/api/')) {
+      return res.status(404).json({ error: 'API endpoint not found' });
+    }
+    
+    // Serve the Next.js app
+    const standaloneDir = path.join(__dirname, '..', 'mondabot-dashboard', '.next', 'standalone');
+    const appDir = path.join(standaloneDir, 'mondabot-dashboard');
+    
+    // Try to serve the requested path
+    const htmlPath = path.join(appDir, 'server', 'app', req.path, 'index.html');
+    
+    if (fs.existsSync(htmlPath)) {
+      res.sendFile(htmlPath);
+    } else {
+      // Try the root index.html
+      const rootHtml = path.join(appDir, 'server', 'app', 'index.html');
+      if (fs.existsSync(rootHtml)) {
+        res.sendFile(rootHtml);
+      } else {
+        // Fallback to a simple response
+        res.status(404).send(`
+          <!DOCTYPE html>
+          <html>
+            <head><title>Mondabot Dashboard</title></head>
+            <body>
+              <h1>Mondabot Dashboard</h1>
+              <p>The application is starting up...</p>
+              <p>If you see this message, the server is running but Next.js files are not properly deployed.</p>
+            </body>
+          </html>
+        `);
+      }
+    }
+  });
+}
 
 // Start server
 // Port configuration for Railway - Railway sets PORT, use that as primary

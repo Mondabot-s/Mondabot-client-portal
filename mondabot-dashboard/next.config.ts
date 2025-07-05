@@ -2,22 +2,17 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   async rewrites() {
-    // In Railway production, services communicate via localhost
-    const isRailway = process.env.RAILWAY_ENVIRONMENT;
-    const isDev = process.env.NODE_ENV === 'development';
-    
-    if (isDev || isRailway) {
-      return [
-        {
-          source: '/api/:path*',
-          destination: 'http://localhost:3001/api/:path*',
-        },
-      ];
-    }
-    return [];
+    return [
+      {
+        source: '/api/:path*',
+        destination: process.env.NODE_ENV === 'production'
+          ? `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/:path*`
+          : 'http://localhost:3001/api/:path*',
+      },
+    ];
   },
   
-  // Railway optimization
+  // CRITICAL: Must be 'standalone' for Railway
   output: 'standalone',
   
   // Handle Railway static assets
@@ -29,19 +24,38 @@ const nextConfig: NextConfig = {
     RAILWAY_ENVIRONMENT: process.env.RAILWAY_ENVIRONMENT,
   },
   
-  // Development optimizations
-  webpack: (config, { dev }) => {
-    if (dev) {
+  // Add webpack config for better error handling
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+      };
+    }
+    
+    if (process.env.NODE_ENV === 'development') {
       config.watchOptions = {
         poll: 1000,
         aggregateTimeout: 300,
       };
     }
+    
     return config;
   },
   
   // Handle source maps in development
   productionBrowserSourceMaps: false,
+  
+  // Add better error handling
+  async redirects() {
+    return [];
+  },
+  
+  // Improve performance
+  compress: true,
+  poweredByHeader: false,
 };
 
 export default nextConfig;
