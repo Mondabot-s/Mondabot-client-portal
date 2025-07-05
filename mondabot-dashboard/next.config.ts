@@ -15,6 +15,9 @@ const nextConfig: NextConfig = {
   // CRITICAL: Must be 'standalone' for Railway
   output: 'standalone',
   
+  // CRITICAL: Add publicRuntimeConfig to prevent "Cannot convert undefined or null to object" error
+  publicRuntimeConfig: {},
+  
   // Handle Railway static assets
   trailingSlash: false,
   

@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const path = require('path');
 const cors = require('cors');
+const next = require('next');
 
 // Load environment variables FIRST with error handling
 try {
@@ -572,103 +573,69 @@ if (process.env.NODE_ENV === 'production') {
   
   const nextAppPath = path.join(__dirname, '..', 'mondabot-dashboard');
   
-  // Dynamically require the Next.js server module
-  let NextServer;
-  try {
-    const nextServerPath = path.join(nextAppPath, 'node_modules', 'next', 'dist', 'server', 'next-server');
-    NextServer = require(nextServerPath).default;
-    console.log('✅ Successfully loaded Next.js server module.');
-  } catch (e) {
-    console.error('❌ Failed to load Next.js server module. Ensure Next.js is a dependency in the root package.json.');
-    console.error(e);
-    process.exit(1);
-  }
-
-  // Instantiate the Next.js server with the correct configuration
-  const nextApp = new NextServer({
-    hostname: 'localhost',
-    port: 3000, // This is an internal port, Railway will map it externally.
-    dir: nextAppPath, // Points to the 'mondabot-dashboard' directory
-    dev: false,
-    conf: {
-      distDir: '.next', // Tells Next.js where to find the build output
-      output: 'standalone',
-      trailingSlash: false,
-      compress: true,
-      poweredByHeader: false,
-      productionBrowserSourceMaps: false,
-      experimental: {
-        ppr: false, // Explicitly set PPR to false to prevent the error
-      },
-      amp: {
-        canonicalBase: '', // Add missing amp configuration
-      },
-      images: {
-        domains: [], // Add empty images configuration
-        unoptimized: false,
-      },
-      i18n: null, // Explicitly set i18n to null if not used
-      env: {
-        BACKEND_URL: process.env.BACKEND_URL || 'http://localhost:3001',
-        RAILWAY_ENVIRONMENT: process.env.RAILWAY_ENVIRONMENT,
-      },
-      async rewrites() {
-        return [
-          {
-            source: '/api/:path*',
-            destination: process.env.NODE_ENV === 'production'
-              ? `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/:path*`
-              : 'http://localhost:3001/api/:path*',
-          },
-        ];
-      },
-      async redirects() {
-        return [];
-      },
-    },
+  // Use proper Next.js initialization instead of manual NextServer instantiation
+  const dev = false;
+  const nextApp = next({
+    dev,
+    dir: nextAppPath // Points to the 'mondabot-dashboard' directory
   });
-
   const handle = nextApp.getRequestHandler();
   
-  console.log('✅ Next.js request handler created.');
-
-  // This is the catch-all that sends all other requests to Next.js
-  app.all('*', (req, res) => {
-    return handle(req, res);
+  console.log('✅ Next.js app created. Preparing...');
+  
+  // Wrap everything in nextApp.prepare() to ensure proper initialization
+  nextApp.prepare().then(() => {
+    console.log('✅ Next.js app prepared successfully.');
+    
+    // This is the catch-all that sends all other requests to Next.js
+    app.all('*', (req, res) => {
+      return handle(req, res);
+    });
+    
+    // Start server after Next.js is ready
+    startServer();
+  }).catch(err => {
+    console.error('❌ Error preparing Next.js app:', err);
+    process.exit(1);
   });
+} else {
+  // In development, start server immediately (no Next.js integration)
+  startServer();
 }
 
-// Start server
-// Port configuration for Railway - Railway sets PORT, use that as primary
-const API_PORT = process.env.PORT || process.env.API_PORT || 3001;
-const FRONTEND_URL = process.env.FRONTEND_URL || `http://localhost:${API_PORT}`;
+// Extract server startup logic into a function
+function startServer() {
+  // Port configuration for Railway - Railway sets PORT, use that as primary
+  const API_PORT = process.env.PORT || process.env.API_PORT || 3001;
+  const FRONTEND_URL = process.env.FRONTEND_URL || `http://localhost:${API_PORT}`;
 
-console.log(`🔧 Starting Express server on port ${API_PORT}`);
-console.log(`🌐 Frontend URL: ${FRONTEND_URL}`);
+  console.log(`🔧 Starting Express server on port ${API_PORT}`);
+  console.log(`🌐 Frontend URL: ${FRONTEND_URL}`);
 
-server.listen(API_PORT, '0.0.0.0', () => {
-  console.log(`\n🚀 Express server running on http://localhost:${API_PORT}`);
-  console.log('\n📊 Available endpoints:');
-  console.log(`   GET  http://localhost:${API_PORT}/health - Server health check`);
-  console.log(`   GET  http://localhost:${API_PORT}/api/debug - Debug information`);
-  console.log(`   GET  http://localhost:${API_PORT}/api/test-projects - Test endpoint (dummy data)`);
-  console.log(`   GET  http://localhost:${API_PORT}/api/projects - Fetch projects from Airtable`);
-  console.log(`   GET  http://localhost:${API_PORT}/api/tasks - Fetch tasks from Airtable`);
-  
-  console.log('\n🔧 Environment Info:');
-  console.log(`   NODE_ENV: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`   RAILWAY_ENVIRONMENT: ${process.env.RAILWAY_ENVIRONMENT || 'local'}`);
-  console.log(`   API_PORT: ${API_PORT}`);
-  console.log(`   FRONTEND_URL: ${FRONTEND_URL}`);
-  
-  if (!base) {
-    console.log('\n⚠️  WARNING: Airtable is not configured!');
-    console.log('   The server is running but cannot fetch real data.');
-    console.log('   Check the missing items listed above.');
-  } else {
-    console.log('\n✅ Server is ready to handle requests!');
-  }
-});
+  server.listen(API_PORT, '0.0.0.0', () => {
+    console.log(`\n🚀 Express server running on http://localhost:${API_PORT}`);
+    console.log('\n📊 Available endpoints:');
+    console.log(`   GET  http://localhost:${API_PORT}/health - Server health check`);
+    console.log(`   GET  http://localhost:${API_PORT}/api/debug - Debug information`);
+    console.log(`   GET  http://localhost:${API_PORT}/api/test-projects - Test endpoint (dummy data)`);
+    console.log(`   GET  http://localhost:${API_PORT}/api/projects - Fetch projects from Airtable`);
+    console.log(`   GET  http://localhost:${API_PORT}/api/tasks - Fetch tasks from Airtable`);
+    
+    console.log('\n🔧 Environment Info:');
+    console.log(`   NODE_ENV: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`   RAILWAY_ENVIRONMENT: ${process.env.RAILWAY_ENVIRONMENT || 'local'}`);
+    console.log(`   API_PORT: ${API_PORT}`);
+    console.log(`   FRONTEND_URL: ${FRONTEND_URL}`);
+    
+    if (!base) {
+      console.log('\n⚠️  WARNING: Airtable is not configured!');
+      console.log('   The server is running but cannot fetch real data.');
+      console.log('   Check the missing items listed above.');
+    } else {
+      console.log('\n✅ Server is ready to handle requests!');
+    }
+  });
+}
 
 // Handle server errors
 server.on('error', (error) => {
