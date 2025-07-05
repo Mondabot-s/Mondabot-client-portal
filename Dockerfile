@@ -5,7 +5,7 @@ FROM node:18-alpine AS builder
 WORKDIR /app
 
 # Set build-time environment variables for Next.js prerendering
-ENV NODE_ENV=production
+# Note: NOT setting NODE_ENV=production here to allow devDependencies installation
 ENV NEXT_PUBLIC_ENABLE_AUTHENTICATION=true
 # Add build args for Clerk keys that will be passed from Railway
 ARG NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
@@ -20,20 +20,20 @@ COPY server/package*.json ./server/
 COPY mondabot-dashboard/package*.json ./mondabot-dashboard/
 
 # Install dependencies in the correct order
-# Use npm install instead of npm ci to handle potential lock file sync issues
+# Install both dependencies and devDependencies for build process
 # First install root dependencies (includes next, react, etc.)
-RUN npm install
+RUN npm install --include=dev
 
-# Then install server dependencies (includes next dependency)
-RUN npm install --prefix server
+# Then install server dependencies
+RUN npm install --prefix server --include=dev
 
-# Finally install frontend dependencies
-RUN npm install --prefix mondabot-dashboard
+# Finally install frontend dependencies (including tailwindcss as devDependency)
+RUN npm install --prefix mondabot-dashboard --include=dev
 
 # Copy the rest of the source code
 COPY . .
 
-# Build the Next.js application
+# Build the Next.js application (this needs devDependencies like tailwindcss)
 RUN cd mondabot-dashboard && npm run build
 
 # Stage 2: Create the final production image
@@ -41,7 +41,7 @@ FROM node:18-alpine AS runner
 
 WORKDIR /app
 
-# Set environment to production
+# Set environment to production for runtime
 ENV NODE_ENV=production
 ENV RAILWAY_ENVIRONMENT=production
 ENV NEXT_PUBLIC_ENABLE_AUTHENTICATION=true
