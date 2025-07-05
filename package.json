@@ -28,7 +28,7 @@
     "test-production:unix": "NODE_ENV=production npm run railway:start",
     "test-railway": "node scripts/test-railway-build.js",
     "test-static": "node scripts/test-static-serving.js",
-    "railway:build": "npm install && cd server && npm install && cd .. && cd mondabot-dashboard && npm run build",
+    "railway:build": "echo '🔧 Railway Build Process Started...' && npm install && echo '📦 Installing server dependencies...' && cd server && npm install && echo '📦 Installing frontend dependencies...' && cd ../mondabot-dashboard && npm install && echo '🏗️ Building Next.js application...' && npm run build && echo '✅ Railway build completed successfully!'",
     "railway:start": "node scripts/start-production.js",
     "start:api": "cd server && npm start",
     "start:web": "cd mondabot-dashboard && npm start",
@@ -38,6 +38,9 @@
     "@fortawesome/fontawesome-free": "^6.7.2",
     "dotenv": "^17.0.0",
     "lucide-react": "^0.522.0",
+    "next": "15.3.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "swr": "^2.3.3"
   },
   "devDependencies": {

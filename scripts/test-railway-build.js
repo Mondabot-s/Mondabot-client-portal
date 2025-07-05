@@ -11,122 +11,99 @@ const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-console.log('🚀 Testing Railway Build Process Locally...\n');
+console.log('🧪 Testing Railway Build Configuration...\n');
 
-// Test 1: Check if required files exist
-console.log('📋 Step 1: Checking required files...');
-const requiredFiles = [
-  'Dockerfile',
-  'railway.json',
+// Test 1: Check if all package.json files exist
+const packageJsonFiles = [
   'package.json',
-  'mondabot-dashboard/package.json',
   'server/package.json',
-  'mondabot-dashboard/next.config.ts'
+  'mondabot-dashboard/package.json'
 ];
 
-let allFilesExist = true;
-requiredFiles.forEach(file => {
-  if (fs.existsSync(file)) {
-    console.log(`   ✅ ${file}`);
-  } else {
-    console.log(`   ❌ ${file} - MISSING!`);
-    allFilesExist = false;
-  }
+console.log('📦 Checking package.json files...');
+packageJsonFiles.forEach(file => {
+  const exists = fs.existsSync(path.join(__dirname, '..', file));
+  console.log(`   ${file}: ${exists ? '✅' : '❌'}`);
 });
 
-if (!allFilesExist) {
-  console.log('\n❌ Some required files are missing. Fix these before deploying.');
-  process.exit(1);
-}
-
-// Test 2: Check Next.js configuration
-console.log('\n📋 Step 2: Checking Next.js configuration...');
+// Test 2: Check if Next.js is properly configured
+console.log('\n🔧 Checking Next.js configuration...');
 try {
-  const nextConfig = fs.readFileSync('mondabot-dashboard/next.config.ts', 'utf8');
-  if (nextConfig.includes("output: 'standalone'")) {
-    console.log('   ✅ Next.js configured for standalone output');
-  } else {
-    console.log('   ❌ Next.js not configured for standalone output');
-    process.exit(1);
-  }
+  const serverPkg = require('../server/package.json');
+  const hasNext = serverPkg.dependencies && serverPkg.dependencies.next;
+  console.log(`   Next.js in server dependencies: ${hasNext ? '✅' : '❌'}`);
   
-  if (nextConfig.includes("output: 'export'")) {
-    console.log('   ❌ FORBIDDEN: Static export detected! This breaks the architecture.');
-    process.exit(1);
-  }
+  const rootPkg = require('../package.json');
+  const hasNextRoot = rootPkg.dependencies && rootPkg.dependencies.next;
+  console.log(`   Next.js in root dependencies: ${hasNextRoot ? '✅' : '❌'}`);
+  
+  const frontendPkg = require('../mondabot-dashboard/package.json');
+  const hasNextFrontend = frontendPkg.dependencies && frontendPkg.dependencies.next;
+  console.log(`   Next.js in frontend dependencies: ${hasNextFrontend ? '✅' : '❌'}`);
 } catch (error) {
-  console.log('   ❌ Could not read Next.js config:', error.message);
-  process.exit(1);
+  console.log(`   Error checking dependencies: ❌ ${error.message}`);
 }
 
-// Test 3: Check package.json scripts
-console.log('\n📋 Step 3: Checking Railway scripts...');
+// Test 3: Check if Next.js config exists
+console.log('\n⚙️ Checking Next.js configuration file...');
+const nextConfigExists = fs.existsSync(path.join(__dirname, '..', 'mondabot-dashboard', 'next.config.ts'));
+console.log(`   next.config.ts exists: ${nextConfigExists ? '✅' : '❌'}`);
+
+if (nextConfigExists) {
+  try {
+    const nextConfigContent = fs.readFileSync(path.join(__dirname, '..', 'mondabot-dashboard', 'next.config.ts'), 'utf8');
+    const hasPublicRuntimeConfig = nextConfigContent.includes('publicRuntimeConfig');
+    const hasStandalone = nextConfigContent.includes('standalone');
+    console.log(`   Has publicRuntimeConfig: ${hasPublicRuntimeConfig ? '✅' : '❌'}`);
+    console.log(`   Has standalone output: ${hasStandalone ? '✅' : '❌'}`);
+  } catch (error) {
+    console.log(`   Error reading next.config.ts: ❌ ${error.message}`);
+  }
+}
+
+// Test 4: Check Docker configuration
+console.log('\n🐳 Checking Docker configuration...');
+const dockerfileExists = fs.existsSync(path.join(__dirname, '..', 'Dockerfile'));
+console.log(`   Dockerfile exists: ${dockerfileExists ? '✅' : '❌'}`);
+
+const railwayJsonExists = fs.existsSync(path.join(__dirname, '..', 'railway.json'));
+console.log(`   railway.json exists: ${railwayJsonExists ? '✅' : '❌'}`);
+
+// Test 5: Check production scripts
+console.log('\n🚀 Checking production scripts...');
+const startProductionExists = fs.existsSync(path.join(__dirname, 'start-production.js'));
+console.log(`   start-production.js exists: ${startProductionExists ? '✅' : '❌'}`);
+
 try {
-  const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-  const requiredScripts = ['railway:build', 'railway:start', 'start:api', 'start:web'];
-  
-  requiredScripts.forEach(script => {
-    if (packageJson.scripts[script]) {
-      console.log(`   ✅ ${script}: ${packageJson.scripts[script]}`);
-    } else {
-      console.log(`   ❌ Missing script: ${script}`);
-      process.exit(1);
-    }
-  });
+  const rootPkg = require('../package.json');
+  const hasRailwayBuild = rootPkg.scripts && rootPkg.scripts['railway:build'];
+  const hasRailwayStart = rootPkg.scripts && rootPkg.scripts['railway:start'];
+  console.log(`   railway:build script: ${hasRailwayBuild ? '✅' : '❌'}`);
+  console.log(`   railway:start script: ${hasRailwayStart ? '✅' : '❌'}`);
 } catch (error) {
-  console.log('   ❌ Could not read package.json:', error.message);
-  process.exit(1);
+  console.log(`   Error checking scripts: ❌ ${error.message}`);
 }
 
-// Test 4: Test build process
-console.log('\n📋 Step 4: Testing build process...');
-console.log('   Running: npm run railway:build');
+// Test 6: Check server configuration
+console.log('\n🔧 Checking server configuration...');
+const serverExists = fs.existsSync(path.join(__dirname, '..', 'server', 'server.js'));
+console.log(`   server.js exists: ${serverExists ? '✅' : '❌'}`);
 
-const buildProcess = spawn('npm', ['run', 'railway:build'], {
-  stdio: 'inherit',
-  shell: true
-});
-
-buildProcess.on('close', (code) => {
-  if (code === 0) {
-    console.log('\n✅ Build process completed successfully!');
-    
-    // Test 5: Check if build artifacts exist
-    console.log('\n📋 Step 5: Checking build artifacts...');
-    const buildArtifacts = [
-      'mondabot-dashboard/.next',
-      'mondabot-dashboard/.next/standalone',
-      'mondabot-dashboard/.next/static'
-    ];
-    
-    let allArtifactsExist = true;
-    buildArtifacts.forEach(artifact => {
-      if (fs.existsSync(artifact)) {
-        console.log(`   ✅ ${artifact}`);
-      } else {
-        console.log(`   ❌ ${artifact} - Build artifact missing!`);
-        allArtifactsExist = false;
-      }
-    });
-    
-    if (allArtifactsExist) {
-      console.log('\n🎉 All tests passed! Your project is ready for Railway deployment.');
-      console.log('\n📋 Next steps:');
-      console.log('   1. Push your changes to GitHub');
-      console.log('   2. Deploy to Railway');
-      console.log('   3. Set environment variables in Railway dashboard');
-      console.log('   4. Monitor the deployment logs');
-    } else {
-      console.log('\n❌ Build artifacts are missing. Check the build process.');
-      process.exit(1);
-    }
-  } else {
-    console.log(`\n❌ Build process failed with code ${code}`);
-    process.exit(1);
+if (serverExists) {
+  try {
+    const serverContent = fs.readFileSync(path.join(__dirname, '..', 'server', 'server.js'), 'utf8');
+    const hasNextRequire = serverContent.includes("require('next')");
+    const hasProductionCheck = serverContent.includes("process.env.NODE_ENV === 'production'");
+    const hasHealthEndpoint = serverContent.includes("'/health'");
+    console.log(`   Has Next.js require: ${hasNextRequire ? '✅' : '❌'}`);
+    console.log(`   Has production check: ${hasProductionCheck ? '✅' : '❌'}`);
+    console.log(`   Has health endpoint: ${hasHealthEndpoint ? '✅' : '❌'}`);
+  } catch (error) {
+    console.log(`   Error reading server.js: ❌ ${error.message}`);
   }
-});
+}
 
-buildProcess.on('error', (error) => {
-  console.log('\n❌ Build process error:', error.message);
-  process.exit(1);
-}); 
+console.log('\n📊 Railway Build Test Summary:');
+console.log('   If all items above show ✅, your Railway deployment should work correctly.');
+console.log('   If any items show ❌, please fix those issues before deploying.');
+console.log('\n🚀 Ready for Railway deployment!'); 

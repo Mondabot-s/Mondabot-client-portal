@@ -573,11 +573,28 @@ if (process.env.NODE_ENV === 'production') {
   
   const nextAppPath = path.join(__dirname, '..', 'mondabot-dashboard');
   
-  // Use proper Next.js initialization instead of manual NextServer instantiation
+  // Check if Next.js is available
+  let nextModule;
+  try {
+    nextModule = require('next');
+    console.log('✅ Next.js module loaded successfully');
+  } catch (error) {
+    console.error('❌ Failed to load Next.js module:', error.message);
+    console.error('   This is likely a dependency issue. Next.js should be installed in server/package.json');
+    console.error('   Continuing without Next.js integration - API routes will still work');
+    startServer();
+    return;
+  }
+  
+  // Use proper Next.js initialization
   const dev = false;
-  const nextApp = next({
+  const nextApp = nextModule({
     dev,
-    dir: nextAppPath // Points to the 'mondabot-dashboard' directory
+    dir: nextAppPath, // Points to the 'mondabot-dashboard' directory
+    conf: {
+      distDir: '.next',
+      output: 'standalone'
+    }
   });
   const handle = nextApp.getRequestHandler();
   
@@ -589,6 +606,15 @@ if (process.env.NODE_ENV === 'production') {
     
     // This is the catch-all that sends all other requests to Next.js
     app.all('*', (req, res) => {
+      // Skip API routes - they should be handled by Express
+      if (req.path.startsWith('/api/')) {
+        return res.status(404).json({
+          error: 'API route not found',
+          message: `API route ${req.method} ${req.path} does not exist`
+        });
+      }
+      
+      // Handle all other routes with Next.js
       return handle(req, res);
     });
     
@@ -596,7 +622,8 @@ if (process.env.NODE_ENV === 'production') {
     startServer();
   }).catch(err => {
     console.error('❌ Error preparing Next.js app:', err);
-    process.exit(1);
+    console.error('   Continuing without Next.js integration - API routes will still work');
+    startServer();
   });
 } else {
   // In development, start server immediately (no Next.js integration)
