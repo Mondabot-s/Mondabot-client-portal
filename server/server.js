@@ -571,7 +571,52 @@ app.use((err, req, res, next) => {
 if (process.env.NODE_ENV === 'production') {
   console.log('✅ Production mode detected. Initializing Next.js request handler...');
   
+  // In Railway, the Next.js build should be in the same directory structure
   const nextAppPath = path.join(__dirname, '..', 'mondabot-dashboard');
+  const nextBuildPath = path.join(nextAppPath, '.next');
+  
+  console.log('🔍 Checking Next.js build...');
+  console.log(`   Next.js app path: ${nextAppPath}`);
+  console.log(`   Next.js build path: ${nextBuildPath}`);
+  
+  // Check if Next.js build exists
+  const fs = require('fs');
+  const nextBuildExists = fs.existsSync(nextBuildPath);
+  console.log(`   Next.js build exists: ${nextBuildExists ? '✅ Yes' : '❌ No'}`);
+  
+  if (!nextBuildExists) {
+    console.log('⚠️  Next.js build not found. Serving API-only mode...');
+    console.log('   Frontend routes will return 404. This is expected for API-only deployment.');
+    
+    // Add a helpful message for frontend routes
+    app.get('*', (req, res) => {
+      // Skip API routes - they should be handled by Express
+      if (req.path.startsWith('/api/')) {
+        return res.status(404).json({
+          error: 'API route not found',
+          message: `API route ${req.method} ${req.path} does not exist`
+        });
+      }
+      
+      // For frontend routes, return a helpful message
+      res.status(200).json({
+        message: 'Mondabot Dashboard API Server',
+        status: 'running',
+        mode: 'api-only',
+        note: 'Frontend not available in this deployment configuration',
+        availableEndpoints: [
+          'GET /health - Server health check',
+          'GET /api/debug - Debug information',
+          'GET /api/projects - Fetch projects from Airtable',
+          'GET /api/tasks - Fetch tasks from Airtable'
+        ],
+        timestamp: new Date().toISOString()
+      });
+    });
+    
+    startServer();
+    return;
+  }
   
   // Check if Next.js is available
   let nextModule;
@@ -581,7 +626,32 @@ if (process.env.NODE_ENV === 'production') {
   } catch (error) {
     console.error('❌ Failed to load Next.js module:', error.message);
     console.error('   This is likely a dependency issue. Next.js should be installed in server/package.json');
-    console.error('   Continuing without Next.js integration - API routes will still work');
+    console.error('   Falling back to API-only mode...');
+    
+    // Fallback to API-only mode
+    app.get('*', (req, res) => {
+      if (req.path.startsWith('/api/')) {
+        return res.status(404).json({
+          error: 'API route not found',
+          message: `API route ${req.method} ${req.path} does not exist`
+        });
+      }
+      
+      res.status(200).json({
+        message: 'Mondabot Dashboard API Server',
+        status: 'running',
+        mode: 'api-only',
+        note: 'Next.js module not available',
+        availableEndpoints: [
+          'GET /health - Server health check',
+          'GET /api/debug - Debug information',
+          'GET /api/projects - Fetch projects from Airtable',
+          'GET /api/tasks - Fetch tasks from Airtable'
+        ],
+        timestamp: new Date().toISOString()
+      });
+    });
+    
     startServer();
     return;
   }
@@ -615,6 +685,7 @@ if (process.env.NODE_ENV === 'production') {
       }
       
       // Handle all other routes with Next.js
+      console.log(`🎨 Serving Next.js route: ${req.method} ${req.path}`);
       return handle(req, res);
     });
     
@@ -622,7 +693,33 @@ if (process.env.NODE_ENV === 'production') {
     startServer();
   }).catch(err => {
     console.error('❌ Error preparing Next.js app:', err);
-    console.error('   Continuing without Next.js integration - API routes will still work');
+    console.error('   Falling back to API-only mode...');
+    
+    // Fallback to API-only mode
+    app.get('*', (req, res) => {
+      if (req.path.startsWith('/api/')) {
+        return res.status(404).json({
+          error: 'API route not found',
+          message: `API route ${req.method} ${req.path} does not exist`
+        });
+      }
+      
+      res.status(200).json({
+        message: 'Mondabot Dashboard API Server',
+        status: 'running',
+        mode: 'api-only',
+        note: 'Next.js initialization failed',
+        error: err.message,
+        availableEndpoints: [
+          'GET /health - Server health check',
+          'GET /api/debug - Debug information',
+          'GET /api/projects - Fetch projects from Airtable',
+          'GET /api/tasks - Fetch tasks from Airtable'
+        ],
+        timestamp: new Date().toISOString()
+      });
+    });
+    
     startServer();
   });
 } else {
