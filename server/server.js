@@ -592,6 +592,31 @@ if (process.env.NODE_ENV === 'production') {
     dev: false,
     conf: {
       distDir: '.next', // Tells Next.js where to find the build output
+      output: 'standalone',
+      trailingSlash: false,
+      compress: true,
+      poweredByHeader: false,
+      productionBrowserSourceMaps: false,
+      experimental: {
+        ppr: false, // Explicitly set PPR to false to prevent the error
+      },
+      env: {
+        BACKEND_URL: process.env.BACKEND_URL || 'http://localhost:3001',
+        RAILWAY_ENVIRONMENT: process.env.RAILWAY_ENVIRONMENT,
+      },
+      async rewrites() {
+        return [
+          {
+            source: '/api/:path*',
+            destination: process.env.NODE_ENV === 'production'
+              ? `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/:path*`
+              : 'http://localhost:3001/api/:path*',
+          },
+        ];
+      },
+      async redirects() {
+        return [];
+      },
     },
   });
 
