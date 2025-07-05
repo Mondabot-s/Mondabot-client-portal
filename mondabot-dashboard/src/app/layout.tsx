@@ -4,6 +4,7 @@ import "./globals.css";
 import "@fortawesome/fontawesome-free/css/all.css";
 import Layout from "../components/Layout";
 import DevHealthCheck from "../components/DevHealthCheck";
+import { ClerkProvider } from "@clerk/nextjs";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -22,13 +23,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={`${poppins.variable} font-sans page-background`}>
-        <Layout>
-          {children}
-        </Layout>
-        <DevHealthCheck />
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body className={`${poppins.variable} font-sans page-background`}>
+          <Layout>
+            {children}
+          </Layout>
+          <DevHealthCheck />
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

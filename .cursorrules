@@ -1,0 +1,233 @@
+# Cursor Rules: Mondabot Dashboard Architecture Protection
+
+## 🚫 NEVER DO THESE (Critical Architecture Protection)
+
+### Static Export is FORBIDDEN
+- NEVER use `output: 'export'` in next.config.ts
+- NEVER suggest converting to static export for deployment issues
+- NEVER remove API routes to enable static export
+- Static export breaks: Socket.IO, real-time features, server-side functionality
+
+### Port Architecture is SACRED
+- Port 3000 = Frontend with backend proxy (ALWAYS test here)
+- Port 3001 = Backend API only (NEVER test frontend changes here)
+- NEVER suggest merging backend into Next.js API routes
+- NEVER suggest single-port architecture changes
+
+### Development Workflow Protection
+- ALWAYS preserve the dual-server development setup
+- NEVER suggest removing the Express backend
+- NEVER suggest moving Socket.IO to Next.js API routes
+- The proxy setup in next.config.ts is REQUIRED and must be preserved
+
+## ✅ ALWAYS DO THESE (Required Patterns)
+
+### Deployment Issues = Configuration Fix, NOT Architecture Change
+- Railway/deployment errors are ALWAYS configuration issues
+- Fix deployment configuration, NEVER change the application architecture
+- Preserve the Next.js + Express separation at all costs
+- Use proper production build strategies (standalone, not export)
+
+### Maintain Dual Service Architecture
+- Frontend: Next.js with App Router
+- Backend: Express with Airtable integration and Socket.IO
+- Proxy: Next.js rewrites from frontend to backend
+- This architecture is intentional and professional
+
+### Development Environment Rules
+- Both servers must run simultaneously during development
+- Use concurrently for unified startup scripts
+- Always include health checks for development debugging
+- Port 3000 is the ONLY testing environment for frontend changes
+
+## 🛠️ Problem Solving Hierarchy
+
+### 1. Deployment Issues
+```
+IF deployment fails:
+  1. Check build configuration (Dockerfile, package.json scripts)
+  2. Check environment variables
+  3. Check start commands
+  4. Fix Railway/hosting configuration
+  NEVER: Change application architecture
+```
+
+### 2. Development Issues
+```
+IF localhost issues:
+  1. Ensure both servers are running
+  2. Check proxy configuration in next.config.ts
+  3. Verify CORS settings in backend
+  4. Check health endpoints
+  NEVER: Merge servers or change ports
+```
+
+### 3. Build Issues
+```
+IF build fails:
+  1. Use 'standalone' output mode for Next.js
+  2. Fix TypeScript/linting errors
+  3. Update dependencies if needed
+  NEVER: Switch to static export or remove features
+```
+
+## 📋 Required File Structure
+
+### Next.js Configuration (next.config.ts)
+```typescript
+const nextConfig: NextConfig = {
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://localhost:3001/api/:path*',
+      },
+    ];
+  },
+  output: 'standalone', // NEVER 'export'
+};
+```
+
+### Package.json Scripts (Required)
+```json
+{
+  "scripts": {
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "backend": "cd server && npm run dev",
+    "frontend": "next dev",
+    "build": "next build",
+    "start": "next start"
+  }
+}
+```
+
+### Server Structure (Required)
+```
+server/
+├── server.js (or index.js)
+├── package.json
+└── .env
+```
+
+## 🚀 Deployment Strategies (Approved Only)
+
+### Railway Option 1: Monorepo
+- Single service running both Next.js and Express
+- Use concurrently to start both servers
+- Dockerfile builds both applications
+
+### Railway Option 2: Dual Services (Recommended)
+- Separate Railway service for frontend (Next.js)
+- Separate Railway service for backend (Express)
+- Environment variables for service communication
+
+### FORBIDDEN Deployment Approaches
+- ❌ Static export with Express serving files
+- ❌ Moving backend logic to Next.js API routes
+- ❌ Removing real-time Socket.IO functionality
+- ❌ Single-port architecture
+
+## 🔧 When User Reports Issues
+
+### "Changes don't show on localhost:3001"
+**Response:** "Port 3001 is backend-only. Test frontend changes on localhost:3000 where the proxy works."
+
+### "Deployment fails on Railway/Vercel/etc"
+**Response:** "This is a deployment configuration issue. We'll fix the hosting setup, not the application architecture."
+
+### "API routes not working"
+**Response:** "Check the proxy configuration and ensure both servers are running. Never remove the Express backend."
+
+### "Want everything on one port"
+**Response:** "The current architecture is professional and scalable. We'll improve the development workflow, not change the architecture."
+
+## 📖 Educational Reminders
+
+### Architecture Benefits (Always Explain)
+- **Separation of Concerns**: Frontend and backend can evolve independently
+- **Scalability**: Can scale services independently in production
+- **Professional Pattern**: Industry-standard microservices-ready architecture
+- **Development Flexibility**: Multiple frontends can use the same backend
+
+### Common Misconceptions (Always Correct)
+- "Single port is simpler" → Professional apps use multiple services
+- "Static export is better" → Static export removes server-side capabilities
+- "Next.js API routes are sufficient" → Express provides better real-time and scaling options
+
+## 🎯 Success Criteria for Any Changes
+
+Before implementing ANY architectural changes, verify:
+- ✅ Socket.IO real-time functionality preserved
+- ✅ Airtable integration remains in Express backend
+- ✅ Development workflow (npm run dev) still works
+- ✅ Proxy configuration still routes API calls correctly
+- ✅ Both servers can run independently
+- ✅ Production deployment strategy maintains separation
+
+## 🚨 Emergency Prevention
+
+If user insists on problematic changes:
+1. **Explain why the current architecture is superior**
+2. **Show how the change would break existing functionality**
+3. **Offer alternative solutions that preserve architecture**
+4. **Only implement if user explicitly accepts trade-offs**
+
+## 🔐 Authentication Implementation Rules
+
+### When Adding Authentication
+- NEVER remove the Express backend for authentication
+- JWT tokens should be handled by Express server
+- Session management stays on backend
+- Protected routes use middleware on Express
+- Frontend authentication state managed via React Context
+- Login/logout endpoints must be Express API routes
+
+### Authentication Architecture
+```
+Frontend (Next.js) → API Proxy → Express Backend → Authentication Logic
+```
+
+### Required Authentication Endpoints (Express)
+- POST /api/login
+- POST /api/logout  
+- GET /api/verify-token
+- POST /api/register (if needed)
+
+## 🐛 PowerShell Command Issues
+
+### Windows Development Commands
+```powershell
+# Correct way to run commands in PowerShell
+cd server
+npm start
+
+# OR use separate commands
+cd server; npm start
+
+# OR use cmd if && is needed
+cmd /c "cd server && npm start"
+```
+
+### NEVER suggest removing dual-server setup due to PowerShell syntax issues
+- Fix the command syntax, not the architecture
+- Provide PowerShell-compatible alternatives
+- Maintain the professional dual-server development workflow
+
+## 📦 Dependency Management
+
+### Backend Dependencies (server/package.json)
+- express (required)
+- socket.io (required for real-time)
+- airtable (required for data)
+- cors (required for frontend communication)
+- dotenv (required for environment variables)
+
+### Frontend Dependencies (package.json)
+- next (required)
+- react (required)
+- socket.io-client (required for real-time)
+- concurrently (required for development)
+
+### NEVER remove core dependencies to "simplify" the stack
+
+Remember: This architecture is intentionally sophisticated and follows industry best practices. Protect it! 

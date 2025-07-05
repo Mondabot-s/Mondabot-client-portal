@@ -169,3 +169,99 @@ body {
 .focus\:ring-brand-primary:focus {
   --tw-ring-color: var(--brand-primary);
 }
+
+/* Clerk Integration Styles */
+.clerk-signin-container,
+.clerk-signup-container {
+  /* Remove default Clerk styling to use our custom appearance */
+}
+
+.clerk-signin-container .cl-card,
+.clerk-signup-container .cl-card {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.clerk-signin-container .cl-headerTitle,
+.clerk-signup-container .cl-headerTitle,
+.clerk-signin-container .cl-headerSubtitle,
+.clerk-signup-container .cl-headerSubtitle {
+  display: none !important;
+}
+
+/* Ensure Clerk inputs maintain the branded focus states */
+.clerk-signin-container input:focus,
+.clerk-signup-container input:focus {
+  outline: none !important;
+  ring: 2px solid #d90077 !important;
+  border-color: transparent !important;
+}
+
+/* Ensure Clerk buttons maintain the branded styling */
+.clerk-signin-container button[type="submit"],
+.clerk-signup-container button[type="submit"] {
+  background: linear-gradient(to right, #d90077, #ff1493) !important;
+  border: none !important;
+  border-radius: 0.75rem !important;
+  color: white !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+}
+
+.clerk-signin-container button[type="submit"]:hover,
+.clerk-signup-container button[type="submit"]:hover {
+  background: linear-gradient(to right, #b80062, #e91e63) !important;
+  transform: scale(1.02) !important;
+}
+
+/* Ensure OAuth buttons maintain consistent styling */
+.clerk-signin-container .cl-socialButtonsBlockButton,
+.clerk-signup-container .cl-socialButtonsBlockButton {
+  border: 1px solid #d1d5db !important;
+  border-radius: 0.75rem !important;
+  background: white !important;
+  color: #374151 !important;
+  transition: all 0.2s ease !important;
+}
+
+.clerk-signin-container .cl-socialButtonsBlockButton:hover,
+.clerk-signup-container .cl-socialButtonsBlockButton:hover {
+  background: #f9fafb !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Ensure error messages and alerts maintain consistent styling */
+.clerk-signin-container .cl-alert,
+.clerk-signup-container .cl-alert {
+  border-radius: 0.75rem !important;
+  padding: 0.75rem !important;
+}
+
+.clerk-signin-container .cl-alert--error,
+.clerk-signup-container .cl-alert--error {
+  background: #fef2f2 !important;
+  border: 1px solid #fecaca !important;
+  color: #dc2626 !important;
+}
+
+.clerk-signin-container .cl-alert--success,
+.clerk-signup-container .cl-alert--success {
+  background: #f0fdf4 !important;
+  border: 1px solid #bbf7d0 !important;
+  color: #16a34a !important;
+}
+
+/* Ensure links maintain the branded color */
+.clerk-signin-container a,
+.clerk-signup-container a {
+  color: #d90077 !important;
+  text-decoration: none !important;
+  transition: color 0.2s ease !important;
+}
+
+.clerk-signin-container a:hover,
+.clerk-signup-container a:hover {
+  color: #b80062 !important;
+  text-decoration: underline !important;
+}

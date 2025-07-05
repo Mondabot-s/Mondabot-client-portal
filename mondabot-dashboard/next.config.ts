@@ -2,8 +2,11 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   async rewrites() {
-    // Only proxy in development to prevent conflicts
-    if (process.env.NODE_ENV === 'development') {
+    // In Railway production, services communicate via localhost
+    const isRailway = process.env.RAILWAY_ENVIRONMENT;
+    const isDev = process.env.NODE_ENV === 'development';
+    
+    if (isDev || isRailway) {
       return [
         {
           source: '/api/:path*',
@@ -13,12 +16,19 @@ const nextConfig: NextConfig = {
     }
     return [];
   },
-  // Railway deployment configuration
+  
+  // Railway optimization
   output: 'standalone',
-  // Production environment handling
+  
+  // Handle Railway static assets
+  trailingSlash: false,
+  
+  // Environment configuration
   env: {
     BACKEND_URL: process.env.BACKEND_URL || 'http://localhost:3001',
+    RAILWAY_ENVIRONMENT: process.env.RAILWAY_ENVIRONMENT,
   },
+  
   // Development optimizations
   webpack: (config, { dev }) => {
     if (dev) {
@@ -29,8 +39,7 @@ const nextConfig: NextConfig = {
     }
     return config;
   },
-  // Ensure proper static file serving
-  trailingSlash: false,
+  
   // Handle source maps in development
   productionBrowserSourceMaps: false,
 };

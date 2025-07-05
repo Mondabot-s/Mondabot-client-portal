@@ -1,14 +1,34 @@
 "use client";
 
+import { useUser } from '@clerk/nextjs';
 import Image from 'next/image';
 
 export default function HomePage() {
+    const { user, isLoaded } = useUser();
+
+    // Show loading state while user data is being fetched
+    if (!isLoaded) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl mb-4 shadow-lg">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#d90077]"></div>
+                    </div>
+                    <p className="text-gray-600 font-medium">Loading your dashboard...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Get the user's first name, or default to 'there'
+    const firstName = user?.firstName || 'there';
+
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Header */}
             <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4 animate-slide-up">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Welcome back, Sergio</h1>
+                    <h1 className="text-3xl font-bold text-gray-900">Welcome back, {firstName}</h1>
                     <p className="text-gray-600 mt-1">Here&apos;s your automation empire at a glance</p>
                 </div>
                 <div className="flex items-center space-x-3 w-full sm:w-auto">

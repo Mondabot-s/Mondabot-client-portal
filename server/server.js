@@ -35,7 +35,10 @@ const corsOptions = {
     'http://localhost:5173',
     process.env.FRONTEND_URL,
     process.env.RAILWAY_STATIC_URL,
-    process.env.RAILWAY_PUBLIC_DOMAIN
+    process.env.RAILWAY_PUBLIC_DOMAIN,
+    // Allow Railway internal communication
+    'http://localhost:3000',
+    'https://*.railway.app'
   ].filter(Boolean),
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept'],
@@ -92,7 +95,10 @@ try {
         'http://localhost:5173',
         process.env.FRONTEND_URL,
         process.env.RAILWAY_STATIC_URL,
-        process.env.RAILWAY_PUBLIC_DOMAIN
+        process.env.RAILWAY_PUBLIC_DOMAIN,
+        // Allow Railway internal communication
+        'http://localhost:3000',
+        'https://*.railway.app'
       ].filter(Boolean),
       methods: ['GET', 'POST'],
       credentials: true
@@ -117,11 +123,13 @@ try {
 // Health check endpoint - ALWAYS WORKS
 app.get('/health', (req, res) => {
   console.log('Health check requested');
+  const currentPort = process.env.API_PORT || process.env.PORT || 3001;
   res.status(200).json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    port: PORT,
+    port: currentPort,
     environment: process.env.NODE_ENV || 'development',
+    railway: process.env.RAILWAY_ENVIRONMENT || 'local',
     uptime: process.uptime(),
     airtable: {
       apiKey: process.env.AIRTABLE_API_KEY ? 'configured' : 'missing',
@@ -137,16 +145,20 @@ app.get('/health', (req, res) => {
 
 // Debug endpoint - ALWAYS WORKS
 app.get('/api/debug', (req, res) => {
+  const currentPort = process.env.API_PORT || process.env.PORT || 3001;
   res.json({
     server: 'Express server is running',
-    port: PORT,
+    port: currentPort,
     environment: {
       airtableKey: process.env.AIRTABLE_API_KEY ? 'Set' : 'Not set',
       baseId: process.env.AIRTABLE_BASE_ID || 'Not set',
       nodeVersion: process.version,
       platform: process.platform,
       memory: process.memoryUsage(),
-      cwd: process.cwd()
+      cwd: process.cwd(),
+      railway: process.env.RAILWAY_ENVIRONMENT || 'local',
+      apiPort: process.env.API_PORT || 'not set',
+      frontendUrl: process.env.FRONTEND_URL || 'not set'
     },
     modules: {
       express: '✅ Loaded',
@@ -560,15 +572,27 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-const PORT = process.env.PORT || 3001;
-server.listen(PORT, () => {
-  console.log(`\n🚀 Express server running on http://localhost:${PORT}`);
+// Port configuration for Railway - Use API_PORT if set, otherwise fall back to PORT, then 3001
+const API_PORT = process.env.API_PORT || process.env.PORT || 3001;
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+
+console.log(`🔧 Starting Express server on port ${API_PORT}`);
+console.log(`🌐 Frontend URL: ${FRONTEND_URL}`);
+
+server.listen(API_PORT, '0.0.0.0', () => {
+  console.log(`\n🚀 Express server running on http://localhost:${API_PORT}`);
   console.log('\n📊 Available endpoints:');
-  console.log(`   GET  http://localhost:${PORT}/health - Server health check`);
-  console.log(`   GET  http://localhost:${PORT}/api/debug - Debug information`);
-  console.log(`   GET  http://localhost:${PORT}/api/test-projects - Test endpoint (dummy data)`);
-  console.log(`   GET  http://localhost:${PORT}/api/projects - Fetch projects from Airtable`);
-  console.log(`   GET  http://localhost:${PORT}/api/tasks - Fetch tasks from Airtable`);
+  console.log(`   GET  http://localhost:${API_PORT}/health - Server health check`);
+  console.log(`   GET  http://localhost:${API_PORT}/api/debug - Debug information`);
+  console.log(`   GET  http://localhost:${API_PORT}/api/test-projects - Test endpoint (dummy data)`);
+  console.log(`   GET  http://localhost:${API_PORT}/api/projects - Fetch projects from Airtable`);
+  console.log(`   GET  http://localhost:${API_PORT}/api/tasks - Fetch tasks from Airtable`);
+  
+  console.log('\n🔧 Environment Info:');
+  console.log(`   NODE_ENV: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`   RAILWAY_ENVIRONMENT: ${process.env.RAILWAY_ENVIRONMENT || 'local'}`);
+  console.log(`   API_PORT: ${API_PORT}`);
+  console.log(`   FRONTEND_URL: ${FRONTEND_URL}`);
   
   if (!base) {
     console.log('\n⚠️  WARNING: Airtable is not configured!');
@@ -582,11 +606,11 @@ server.listen(PORT, () => {
 // Handle server errors
 server.on('error', (error) => {
   if (error.code === 'EADDRINUSE') {
-    console.error(`\n❌ Port ${PORT} is already in use!`);
+    console.error(`\n❌ Port ${API_PORT} is already in use!`);
     console.error('   Another process is using this port.');
     console.error('   Solutions:');
     console.error('   1. Kill the other process: taskkill /F /IM node.exe (Windows)');
-    console.error('   2. Use a different port: PORT=3002 npm run server');
+    console.error('   2. Use a different port: API_PORT=3002 npm run server');
     process.exit(1);
   } else {
     console.error('❌ Server error:', error);

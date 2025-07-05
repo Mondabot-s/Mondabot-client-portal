@@ -1,9 +1,9 @@
 'use client';
 
-import { SignIn } from '@clerk/nextjs';
+import { SignUp } from '@clerk/nextjs';
 import Image from 'next/image';
 
-export default function LoginPage() {
+export default function SignUpPage() {
   return (
     <div className="min-h-screen flex">
       {/* Left Side - Branding */}
@@ -32,13 +32,13 @@ export default function LoginPage() {
           </h1>
           
           <p className="text-xl text-gray-300 mb-12 leading-relaxed">
-            Automate, optimize, and scale your business with AI-powered intelligence. 
-            Welcome back to your command center.
+            Join thousands of businesses automating their workflow with AI-powered intelligence. 
+            Start your journey today.
           </p>
         </div>
       </div>
 
-      {/* Right Side - Login Form */}
+      {/* Right Side - Signup Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gradient-to-br from-gray-50 to-white">
         <div className="w-full max-w-md">
           {/* Header */}
@@ -53,16 +53,16 @@ export default function LoginPage() {
               />
             </div>
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              Welcome Back
+              Get Started
             </h2>
             <p className="text-gray-600">
-              Please sign in to your account to continue
+              Create your account to start automating your business
             </p>
           </div>
 
-          {/* Clerk SignIn Component with Custom Styling */}
-          <div className="clerk-signin-container">
-            <SignIn 
+          {/* Clerk SignUp Component with Custom Styling */}
+          <div className="clerk-signup-container">
+            <SignUp 
               appearance={{
                 elements: {
                   formButtonPrimary: 
@@ -105,9 +105,9 @@ export default function LoginPage() {
                     'w-full py-3 px-4 border border-gray-300 rounded-xl text-gray-700 font-medium bg-white hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md',
                 }
               }}
-              signUpUrl="/signup"
-              afterSignInUrl="/"
+              signInUrl="/login"
               afterSignUpUrl="/"
+              afterSignInUrl="/"
             />
           </div>
 

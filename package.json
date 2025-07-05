@@ -24,7 +24,9 @@
     "fresh-install": "npm run clean && npm run setup",
     "check-ports": "powershell \"netstat -ano | findstr :3000; netstat -ano | findstr :3001\"",
     "railway:build": "npm install && npm run build && cd server && npm install",
-    "railway:start": "concurrently --names \"API,WEB\" \"npm run start:server\" \"npm start\"",
+    "railway:start": "concurrently --names \"API,WEB\" --prefix-colors \"blue,green\" \"npm run start:api\" \"npm run start:web\"",
+    "start:api": "cd server && API_PORT=3001 npm start",
+    "start:web": "cd mondabot-dashboard && PORT=3000 npm start",
     "start:server": "cd server && npm start"
   },
   "dependencies": {

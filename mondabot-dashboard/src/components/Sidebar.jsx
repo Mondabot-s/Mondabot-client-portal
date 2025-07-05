@@ -4,12 +4,15 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import { useUser, useClerk } from '@clerk/nextjs';
 
 // This Sidebar component is completely self-contained and styles itself with inline styles,
 // so it does not rely on Tailwind or any external CSS frameworks.
 export default function Sidebar() {
   const pathname = usePathname();
   const [hoveredItem, setHoveredItem] = useState(null);
+  const { user } = useUser();
+  const { signOut } = useClerk();
 
   /** Base link style */
   const linkStyle = {
@@ -64,6 +67,39 @@ export default function Sidebar() {
     { href: '/referrals', label: 'Refer & Win', icon: 'fas fa-gift' },
     { href: '/test-page', label: 'Test Page', icon: 'fas fa-flask' },
   ];
+
+  // Handle sign out
+  const handleSignOut = () => {
+    signOut();
+  };
+
+  // Get user initials
+  const getUserInitials = () => {
+    if (user?.firstName && user?.lastName) {
+      return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`;
+    }
+    if (user?.firstName) {
+      return user.firstName.charAt(0);
+    }
+    if (user?.emailAddresses?.[0]?.emailAddress) {
+      return user.emailAddresses[0].emailAddress.charAt(0).toUpperCase();
+    }
+    return 'U';
+  };
+
+  // Get user display name
+  const getUserDisplayName = () => {
+    if (user?.firstName && user?.lastName) {
+      return `${user.firstName} ${user.lastName}`;
+    }
+    if (user?.firstName) {
+      return user.firstName;
+    }
+    if (user?.emailAddresses?.[0]?.emailAddress) {
+      return user.emailAddresses[0].emailAddress;
+    }
+    return 'User';
+  };
 
   return (
     <aside
@@ -128,17 +164,48 @@ export default function Sidebar() {
               color: 'white',
             }}
           >
-            SM
+            {getUserInitials()}
           </div>
-          <div>
+          <div style={{ flex: 1 }}>
             <div style={{ color: 'white', fontWeight: 600, fontSize: '14px' }}>
-              Sergio Martinez
+              {getUserDisplayName()}
             </div>
-            <div style={{ color: '#9CA3AF', fontSize: '12px', cursor: 'pointer' }}>
-              View Profile
+            <div style={{ color: '#9CA3AF', fontSize: '12px' }}>
+              {user?.emailAddresses?.[0]?.emailAddress}
             </div>
           </div>
         </div>
+        
+        {/* Sign Out Button */}
+        <button
+          onClick={handleSignOut}
+          style={{
+            width: '100%',
+            padding: '8px 16px',
+            borderRadius: '8px',
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            color: '#9CA3AF',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: 500,
+            transition: 'all 0.2s ease',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.backgroundColor = 'rgba(205, 17, 116, 0.1)';
+            e.target.style.color = '#CD1174';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+            e.target.style.color = '#9CA3AF';
+          }}
+        >
+          <i className="fas fa-sign-out-alt" style={{ marginRight: '8px' }}></i>
+          Sign Out
+        </button>
       </div>
     </aside>
   );
