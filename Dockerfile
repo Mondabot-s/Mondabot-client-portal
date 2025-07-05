@@ -10,14 +10,15 @@ COPY server/package*.json ./server/
 COPY mondabot-dashboard/package*.json ./mondabot-dashboard/
 
 # Install dependencies in the correct order
+# Use npm install instead of npm ci to handle potential lock file sync issues
 # First install root dependencies (includes next, react, etc.)
-RUN npm ci
+RUN npm install
 
 # Then install server dependencies (includes next dependency)
-RUN npm ci --prefix server
+RUN npm install --prefix server
 
 # Finally install frontend dependencies
-RUN npm ci --prefix mondabot-dashboard
+RUN npm install --prefix mondabot-dashboard
 
 # Copy the rest of the source code
 COPY . .
