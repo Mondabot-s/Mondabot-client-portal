@@ -9,25 +9,23 @@ const isAuthEnabled = process.env.NEXT_PUBLIC_ENABLE_AUTHENTICATION === 'true';
 
 // A component that uses Clerk hooks
 const UserSpecificContent = () => {
-    // Check if Clerk is configured
+    // Check if authentication is enabled and Clerk is configured
     const isClerkConfigured = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
     
-    // Only use Clerk hooks if Clerk is configured
-    let user = null;
-    let isLoaded = true;
-    
-    if (isAuthEnabled && isClerkConfigured) {
-        try {
-            const userHook = useUser();
-            user = userHook.user;
-            isLoaded = userHook.isLoaded;
-        } catch (error) {
-            // If Clerk hooks fail (e.g., during build), fall back to default values
-            console.warn('Clerk hooks not available:', error);
-            user = null;
-            isLoaded = true;
-        }
+    // Always call useUser hook to comply with React hooks rules
+    let userResult;
+    try {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        userResult = useUser();
+    } catch (error) {
+        // If Clerk hooks fail (e.g., during build), use default values
+        console.warn('Clerk hooks not available:', error);
+        userResult = { user: null, isLoaded: true };
     }
+    
+    // Only use results if authentication is enabled and Clerk is configured
+    const user = (isAuthEnabled && isClerkConfigured) ? userResult.user : null;
+    const isLoaded = (isAuthEnabled && isClerkConfigured) ? userResult.isLoaded : true;
 
     // Get user's first name with fallback
     const getUserFirstName = () => {

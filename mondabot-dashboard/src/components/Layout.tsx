@@ -13,22 +13,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const isAuthEnabled = process.env.NEXT_PUBLIC_ENABLE_AUTHENTICATION === 'true';
   const isClerkConfigured = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
   
-  // Only use Clerk hooks if Clerk is configured
-  let isSignedIn = false;
-  let isLoaded = true;
-  
-  if (isAuthEnabled && isClerkConfigured) {
-    try {
-      const auth = useAuth();
-      isSignedIn = auth.isSignedIn ?? false;
-      isLoaded = auth.isLoaded ?? true;
-    } catch (error) {
-      // If Clerk hooks fail (e.g., during build), fall back to default values
-      console.warn('Clerk hooks not available:', error);
-      isSignedIn = false;
-      isLoaded = true;
-    }
+  // Always call useAuth hook to comply with React hooks rules
+  let authResult;
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    authResult = useAuth();
+  } catch (error) {
+    // If Clerk hooks fail (e.g., during build), use default values
+    console.warn('Clerk hooks not available:', error);
+    authResult = { isSignedIn: false, isLoaded: true };
   }
+  
+  // Only use auth results if authentication is enabled and Clerk is configured
+  const isSignedIn = (isAuthEnabled && isClerkConfigured) ? (authResult.isSignedIn ?? false) : false;
+  const isLoaded = (isAuthEnabled && isClerkConfigured) ? (authResult.isLoaded ?? true) : true;
   
   // Set mounted state after component mounts
   useEffect(() => {
