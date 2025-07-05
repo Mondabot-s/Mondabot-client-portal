@@ -37,6 +37,7 @@ export default function DevHealthCheck() {
           setShowError(true);
         }
       } catch (error) {
+        console.error('Health check failed:', error);
         setStatus(prev => ({ ...prev, backend: 'error' }));
         setShowError(true);
       }

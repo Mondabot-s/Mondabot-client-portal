@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Eye, EyeOff, Mail, Lock, ArrowRight, Sparkles, Shield } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, ArrowRight, Shield } from 'lucide-react';
 import Image from 'next/image';
 
 export default function LoginPage() {

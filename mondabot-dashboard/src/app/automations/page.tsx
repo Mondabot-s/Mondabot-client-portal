@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
-import { getStatusBadgeClasses } from '../../utils/statusTheme';
 
 interface Project {
   id: string;
@@ -37,7 +36,6 @@ export default function AutomationsPage() {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [activeFilter, setActiveFilter] = useState('All Projects');
     const [searchTerm, setSearchTerm] = useState('');
-    const [isSearchFocused, setIsSearchFocused] = useState(false);
 
     // Filter options
     const filters = ['All Projects', 'Building', 'Testing', 'For Review', 'Live', 'Completed'];
@@ -94,13 +92,11 @@ export default function AutomationsPage() {
                 const searchInput = document.getElementById('search-input') as HTMLInputElement;
                 if (searchInput) {
                     searchInput.focus();
-                    setIsSearchFocused(true);
                 }
             }
             // Escape to clear search
             if (event.key === 'Escape' && searchTerm) {
                 setSearchTerm('');
-                setIsSearchFocused(false);
             }
         };
 
@@ -188,7 +184,7 @@ export default function AutomationsPage() {
         result = filterProjects(result, activeFilter);
         result = sortProjects(result, sortOrder);
         return result;
-    }, [projects, searchTerm, activeFilter, sortOrder, searchProjects, filterProjects, sortProjects]);
+    }, [searchTerm, activeFilter, sortOrder, searchProjects, filterProjects, sortProjects]);
 
     const handleSortChange = (newSortOrder: string) => {
         setSortOrder(newSortOrder);
@@ -282,8 +278,6 @@ export default function AutomationsPage() {
                         placeholder="Search projects..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        onFocus={() => setIsSearchFocused(true)}
-                        onBlur={() => setIsSearchFocused(false)}
                         className="block w-full pl-10 pr-20 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-brand-primary focus:border-transparent text-sm transition-all duration-200"
                     />
                     {/* Keyboard shortcut hint */}

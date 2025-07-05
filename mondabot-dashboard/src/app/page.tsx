@@ -9,7 +9,7 @@ export default function HomePage() {
             <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4 animate-slide-up">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">Welcome back, Sergio</h1>
-                    <p className="text-gray-600 mt-1">Here's your automation empire at a glance</p>
+                    <p className="text-gray-600 mt-1">Here&apos;s your automation empire at a glance</p>
                 </div>
                 <div className="flex items-center space-x-3 w-full sm:w-auto">
                     <button className="p-2.5 rounded-lg hover:bg-gray-100 transition relative">
@@ -127,7 +127,7 @@ export default function HomePage() {
                     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-300 hover:-translate-y-1">
                         <div className="p-6">
                             <h2 className="text-2xl font-bold text-gray-900 mb-2">Your Automation Journey</h2>
-                            <p className="text-gray-600 mb-4">Watch how we're transforming your business processes with AI-powered automation</p>
+                            <p className="text-gray-600 mb-4">Watch how we&apos;re transforming your business processes with AI-powered automation</p>
                             
                             <div className="relative w-full bg-gradient-to-br from-gray-900 to-gray-700 rounded-lg overflow-hidden" style={{paddingBottom: '56.25%'}}>
                                 <iframe 
