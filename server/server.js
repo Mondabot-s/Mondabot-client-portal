@@ -122,25 +122,6 @@ try {
   console.error('   Run: npm install socket.io');
 }
 
-// CRITICAL FIX: Proper static file serving for Next.js in production
-if (process.env.NODE_ENV === 'production') {
-  // Serve Next.js static files from the standalone build
-  const standaloneDir = path.join(__dirname, '..', 'mondabot-dashboard', '.next', 'standalone');
-  const staticDir = path.join(__dirname, '..', 'mondabot-dashboard', '.next', 'static');
-  const publicDir = path.join(__dirname, '..', 'mondabot-dashboard', 'public');
-
-  // Check if running in Railway with combined services
-  if (process.env.RAILWAY_ENVIRONMENT) {
-    console.log('🚂 Railway environment detected - configuring unified serving');
-    
-    // Serve Next.js static files
-    app.use('/_next/static', express.static(staticDir));
-    app.use('/public', express.static(publicDir));
-    
-    console.log('✅ Static file serving configured for Railway');
-  }
-}
-
 // Health check endpoint - ALWAYS WORKS
 app.get('/health', (req, res) => {
   console.log('Health check requested');
@@ -567,127 +548,60 @@ app.get('/api/projects/:id', async (req, res) => {
   }
 });
 
-// Production static file serving for Next.js standalone builds
-if (process.env.NODE_ENV === 'production' || process.env.RAILWAY_ENVIRONMENT) {
-  console.log('🏭 Setting up production static file serving...');
-  
-  // Serve Next.js static assets - CORRECT PATH for standalone builds
-  app.use('/_next/static', express.static(path.join(__dirname, '../mondabot-dashboard/.next/static')));
-  
-  // Serve public assets
-  app.use(express.static(path.join(__dirname, '../mondabot-dashboard/public')));
-  
-  // Catch-all handler for client-side routing (production)
-  app.get('*', (req, res, next) => {
-    // Skip API routes and health check
-    if (req.path.startsWith('/api/') || req.path === '/health') {
-      return next();
-    }
-    
-    // For production, serve the Next.js standalone HTML
-    const htmlPath = path.join(__dirname, '../mondabot-dashboard/.next/server/app/index.html');
-    res.sendFile(htmlPath, (err) => {
-      if (err) {
-        console.error('Error serving Next.js app:', err);
-        console.error('Tried to serve:', htmlPath);
-        console.error('File exists:', require('fs').existsSync(htmlPath));
-        
-        // Fallback to a basic HTML response
-        res.status(500).send(`
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <title>Mondabot Dashboard</title>
-              <meta charset="utf-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1">
-            </head>
-            <body>
-              <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #f9fafb;">
-                <div style="text-align: center;">
-                  <h1>Loading Mondabot...</h1>
-                  <p>Static file serving issue. Path: ${htmlPath}</p>
-                  <p>File exists: ${require('fs').existsSync(htmlPath)}</p>
-                </div>
-              </div>
-            </body>
-          </html>
-        `);
-      }
-    });
-  });
-} else {
-  // Development mode - let Next.js handle its own serving via proxy
-  console.log('🔧 Development mode - static files served by Next.js dev server');
-  
-  // Only handle catch-all for non-existent routes in development
-  app.get('*', (req, res, next) => {
-    // Skip API routes and health check
-    if (req.path.startsWith('/api/') || req.path === '/health') {
-      return next();
-    }
-    
-    // In development, redirect to the Next.js dev server
-    res.redirect(`http://localhost:3000${req.path}`);
-  });
-}
-
-// 404 handler
+// 404 handler - This will now be handled by the Next.js catch-all in production
 app.use((req, res) => {
   res.status(404).json({
     error: 'Not found',
-    message: `Route ${req.method} ${req.path} does not exist`
+    message: `Route ${req.method} ${req.path} does not exist on the Express server.`
   });
 });
 
-// Error handler
+// Final error handler
 app.use((err, req, res, next) => {
-  console.error('💥 Unhandled error:', err);
+  console.error('💥 Unhandled Express error:', err);
   res.status(500).json({
     error: 'Internal server error',
     message: err.message
   });
 });
 
-// IMPORTANT: Catch-all route for serving Next.js pages in production (Railway)
-if (process.env.NODE_ENV === 'production' && process.env.RAILWAY_ENVIRONMENT) {
-  const fs = require('fs');
+// CRITICAL: In production, all non-API routes are handed to Next.js.
+// This block MUST come AFTER all other API routes and BEFORE the server starts.
+if (process.env.NODE_ENV === 'production') {
+  console.log('✅ Production mode detected. Initializing Next.js request handler...');
   
-  // Serve Next.js pages - this must be LAST
-  app.get('*', (req, res) => {
-    // Don't serve HTML for API routes
-    if (req.path.startsWith('/api/')) {
-      return res.status(404).json({ error: 'API endpoint not found' });
-    }
-    
-    // Serve the Next.js app
-    const standaloneDir = path.join(__dirname, '..', 'mondabot-dashboard', '.next', 'standalone');
-    const appDir = path.join(standaloneDir, 'mondabot-dashboard');
-    
-    // Try to serve the requested path
-    const htmlPath = path.join(appDir, 'server', 'app', req.path, 'index.html');
-    
-    if (fs.existsSync(htmlPath)) {
-      res.sendFile(htmlPath);
-    } else {
-      // Try the root index.html
-      const rootHtml = path.join(appDir, 'server', 'app', 'index.html');
-      if (fs.existsSync(rootHtml)) {
-        res.sendFile(rootHtml);
-      } else {
-        // Fallback to a simple response
-        res.status(404).send(`
-          <!DOCTYPE html>
-          <html>
-            <head><title>Mondabot Dashboard</title></head>
-            <body>
-              <h1>Mondabot Dashboard</h1>
-              <p>The application is starting up...</p>
-              <p>If you see this message, the server is running but Next.js files are not properly deployed.</p>
-            </body>
-          </html>
-        `);
-      }
-    }
+  const nextAppPath = path.join(__dirname, '..', 'mondabot-dashboard');
+  
+  // Dynamically require the Next.js server module
+  let NextServer;
+  try {
+    const nextServerPath = path.join(nextAppPath, 'node_modules', 'next', 'dist', 'server', 'next-server');
+    NextServer = require(nextServerPath).default;
+    console.log('✅ Successfully loaded Next.js server module.');
+  } catch (e) {
+    console.error('❌ Failed to load Next.js server module. Ensure Next.js is a dependency in the root package.json.');
+    console.error(e);
+    process.exit(1);
+  }
+
+  // Instantiate the Next.js server with the correct configuration
+  const nextApp = new NextServer({
+    hostname: 'localhost',
+    port: 3000, // This is an internal port, Railway will map it externally.
+    dir: nextAppPath, // Points to the 'mondabot-dashboard' directory
+    dev: false,
+    conf: {
+      distDir: '.next', // Tells Next.js where to find the build output
+    },
+  });
+
+  const handle = nextApp.getRequestHandler();
+  
+  console.log('✅ Next.js request handler created.');
+
+  // This is the catch-all that sends all other requests to Next.js
+  app.all('*', (req, res) => {
+    return handle(req, res);
   });
 }
 
