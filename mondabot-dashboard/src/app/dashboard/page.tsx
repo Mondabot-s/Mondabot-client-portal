@@ -23,7 +23,22 @@ import { useUser } from '@clerk/nextjs';
 
 // Overview Section
 const OverviewSection = () => {
-  const { user } = useUser();
+  // Check if Clerk is configured
+  const isClerkConfigured = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  
+  // Only use Clerk hooks if Clerk is configured
+  let user = null;
+  
+  if (isClerkConfigured) {
+    try {
+      const userHook = useUser();
+      user = userHook.user;
+    } catch (error) {
+      // If Clerk hooks fail (e.g., during build), fall back to default values
+      console.warn('Clerk hooks not available:', error);
+      user = null;
+    }
+  }
   
   // Get the user's first name, or default to 'Matthew'
   const firstName = (user?.firstName) || 'Matthew';

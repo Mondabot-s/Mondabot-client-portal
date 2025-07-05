@@ -21,8 +21,25 @@ const ReferralsWithAuth = () => {
     const [isSuccess, setIsSuccess] = useState(false);
     const [error, setError] = useState('');
 
-    // Get current user information from Clerk - now safely wrapped
-    const { user, isLoaded } = useUser();
+    // Check if Clerk is configured
+    const isClerkConfigured = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+    
+    // Only use Clerk hooks if Clerk is configured
+    let user = null;
+    let isLoaded = true;
+    
+    if (isClerkConfigured) {
+        try {
+            const userHook = useUser();
+            user = userHook.user;
+            isLoaded = userHook.isLoaded;
+        } catch (error) {
+            // If Clerk hooks fail (e.g., during build), fall back to default values
+            console.warn('Clerk hooks not available:', error);
+            user = null;
+            isLoaded = true;
+        }
+    }
 
     // Get user's full name and email with fallbacks
     const getUserFullName = () => {

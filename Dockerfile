@@ -2,8 +2,17 @@
 FROM node:18-alpine AS builder
 
 # Set working directory. This is the root directory of the project.
-
 WORKDIR /app
+
+# Set build-time environment variables for Next.js prerendering
+ENV NODE_ENV=production
+ENV NEXT_PUBLIC_ENABLE_AUTHENTICATION=true
+# Add build args for Clerk keys that will be passed from Railway
+ARG NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+ARG CLERK_SECRET_KEY
+# Set them as environment variables for the build
+ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+ENV CLERK_SECRET_KEY=$CLERK_SECRET_KEY
 
 # Copy all package.json and package-lock.json files
 COPY package*.json ./

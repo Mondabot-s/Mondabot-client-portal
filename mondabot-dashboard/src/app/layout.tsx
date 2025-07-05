@@ -33,26 +33,35 @@ export default function RootLayout({
     </html>
   );
 
-  // Always wrap with ClerkProvider and configure custom URLs
-  return (
-    <ClerkProvider
-      appearance={{
-        baseTheme: undefined,
-        variables: {
-          colorPrimary: "#d90077",
-          colorBackground: "#ffffff",
-          colorText: "#1f2937",
-          colorInputBackground: "#ffffff",
-          colorInputText: "#1f2937",
-          borderRadius: "0.5rem",
-        },
-      }}
-      signInUrl="/login"
-      signUpUrl="/signup"
-      afterSignInUrl="/"
-      afterSignUpUrl="/"
-    >
-      {content}
-    </ClerkProvider>
-  );
+  // Check if Clerk is configured
+  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  
+  // Only wrap with ClerkProvider if the publishable key is available
+  if (publishableKey) {
+    return (
+      <ClerkProvider
+        publishableKey={publishableKey}
+        appearance={{
+          baseTheme: undefined,
+          variables: {
+            colorPrimary: "#d90077",
+            colorBackground: "#ffffff",
+            colorText: "#1f2937",
+            colorInputBackground: "#ffffff",
+            colorInputText: "#1f2937",
+            borderRadius: "0.5rem",
+          },
+        }}
+        signInUrl="/login"
+        signUpUrl="/signup"
+        afterSignInUrl="/"
+        afterSignUpUrl="/"
+      >
+        {content}
+      </ClerkProvider>
+    );
+  }
+
+  // Return content without ClerkProvider if key is not available
+  return content;
 }

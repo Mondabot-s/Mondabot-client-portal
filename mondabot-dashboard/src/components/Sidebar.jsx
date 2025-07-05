@@ -18,9 +18,26 @@ export default function Sidebar() {
   // Check if Clerk is properly configured
   const isClerkConfigured = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
   
-  // Always use Clerk hooks since ClerkProvider is always available
-  const { user, isLoaded } = useUser();
-  const { signOut } = useClerk();
+  // Only use Clerk hooks if Clerk is configured
+  let user = null;
+  let isLoaded = true;
+  let signOut = () => {};
+  
+  if (isAuthEnabled && isClerkConfigured) {
+    try {
+      const userHook = useUser();
+      const clerkHook = useClerk();
+      user = userHook.user;
+      isLoaded = userHook.isLoaded;
+      signOut = clerkHook.signOut;
+    } catch (error) {
+      // If Clerk hooks fail (e.g., during build), fall back to default values
+      console.warn('Clerk hooks not available:', error);
+      user = null;
+      isLoaded = true;
+      signOut = () => {};
+    }
+  }
 
   /** Base link style */
   const linkStyle = {

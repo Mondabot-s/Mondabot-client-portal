@@ -9,11 +9,26 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   
-  // Always call useAuth since ClerkProvider is always available
-  const { isSignedIn, isLoaded } = useAuth();
-  
-  // Check if authentication is enabled (using NEXT_PUBLIC_ prefix)
+  // Check if authentication is enabled and Clerk is configured
   const isAuthEnabled = process.env.NEXT_PUBLIC_ENABLE_AUTHENTICATION === 'true';
+  const isClerkConfigured = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  
+  // Only use Clerk hooks if Clerk is configured
+  let isSignedIn = false;
+  let isLoaded = true;
+  
+  if (isAuthEnabled && isClerkConfigured) {
+    try {
+      const auth = useAuth();
+      isSignedIn = auth.isSignedIn ?? false;
+      isLoaded = auth.isLoaded ?? true;
+    } catch (error) {
+      // If Clerk hooks fail (e.g., during build), fall back to default values
+      console.warn('Clerk hooks not available:', error);
+      isSignedIn = false;
+      isLoaded = true;
+    }
+  }
   
   // Set mounted state after component mounts
   useEffect(() => {
@@ -46,8 +61,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // If authentication is enabled, check auth status
-  if (isAuthEnabled) {
+  // If authentication is enabled and Clerk is configured, check auth status
+  if (isAuthEnabled && isClerkConfigured) {
     // Show loading while auth is being checked
     if (!isLoaded) {
       return (
