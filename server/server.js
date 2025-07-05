@@ -32,7 +32,7 @@ const corsOptions = {
   origin: [
     'http://localhost:3000',
     'http://localhost:5173',
-    process.env.FRONTEND_URL || 'http://localhost:3001'
+    process.env.FRONTEND_URL || 'http://localhost:3000'
   ].filter(Boolean),
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept'],
@@ -86,7 +86,7 @@ try {
       origin: [
         'http://localhost:3000',
         'http://localhost:5173',
-        process.env.FRONTEND_URL || 'http://localhost:3001'
+        process.env.FRONTEND_URL || 'http://localhost:3000'
       ].filter(Boolean),
       methods: ['GET', 'POST'],
       credentials: true

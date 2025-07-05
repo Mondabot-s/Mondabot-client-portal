@@ -3,6 +3,7 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import "@fortawesome/fontawesome-free/css/all.css";
 import Layout from "../components/Layout";
+import DevHealthCheck from "../components/DevHealthCheck";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -11,8 +12,8 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Client Onboard",
-  description: "Client Onboard Dashboard",
+  title: "Mondabot Dashboard",
+  description: "Project management dashboard with Airtable integration",
 };
 
 export default function RootLayout({
@@ -26,6 +27,7 @@ export default function RootLayout({
         <Layout>
           {children}
         </Layout>
+        <DevHealthCheck />
       </body>
     </html>
   );

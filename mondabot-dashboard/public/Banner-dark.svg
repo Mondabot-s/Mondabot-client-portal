@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 758.24 155.26">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #170f3a;
+      }
+
+      .cls-2 {
+        fill: #cc1075;
+      }
+
+      .cls-2, .cls-3 {
+        font-family: Montserrat-Bold, Montserrat;
+        font-size: 86.87px;
+        font-variation-settings: 'wght' 700;
+        font-weight: 700;
+      }
+
+      .cls-3 {
+        fill: #fff;
+      }
+    </style>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer 1">
+    <rect class="cls-1" width="758.24" height="155.26"/>
+    <text class="cls-3" transform="translate(44.81 108.86)"><tspan x="0" y="0">M</tspan></text>
+    <text class="cls-3" transform="translate(144.36 108.86)"><tspan x="0" y="0">O</tspan></text>
+    <text class="cls-3" transform="translate(234.27 108.86)"><tspan x="0" y="0">N</tspan></text>
+    <text class="cls-3" transform="translate(321.05 108.86)"><tspan x="0" y="0">D</tspan></text>
+    <text class="cls-3" transform="translate(408.52 108.86)"><tspan x="0" y="0">A</tspan></text>
+    <text class="cls-2" transform="translate(491.65 108.86)"><tspan x="0" y="0">B</tspan></text>
+    <text class="cls-2" transform="translate(574.7 108.86)"><tspan x="0" y="0">O</tspan></text>
+    <text class="cls-2" transform="translate(663.73 108.86)"><tspan x="0" y="0">T</tspan></text>
+  </g>
+</svg>

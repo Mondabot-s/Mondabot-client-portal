@@ -9,6 +9,20 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  // Development optimizations
+  webpack: (config, { dev }) => {
+    if (dev) {
+      config.watchOptions = {
+        poll: 1000,
+        aggregateTimeout: 300,
+      };
+    }
+    return config;
+  },
+  // Ensure proper static file serving
+  trailingSlash: false,
+  // Handle source maps in development
+  productionBrowserSourceMaps: false,
 };
 
 export default nextConfig;

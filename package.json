@@ -3,16 +3,25 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"npm run dev:server\" \"npm run dev:next\"",
-    "dev:next": "cd mondabot-dashboard && npm run dev",
+    "dev": "concurrently --names \"🔧BACKEND,🎨FRONTEND\" --prefix-colors \"blue,green\" \"npm run backend\" \"npm run frontend\" \"npm run dev-info\"",
+    "backend": "cd server && npm run dev",
+    "frontend": "cd mondabot-dashboard && npm run dev",
+    "dev-info": "wait-on http://localhost:3000 http://localhost:3001 && echo '\n✅ Development ready!\n🎨 Frontend: http://localhost:3000\n🔧 Backend API: http://localhost:3001\n⚠️  ALWAYS TEST ON: http://localhost:3000\n'",
     "dev:server": "cd server && npm run dev",
+    "dev:next": "cd mondabot-dashboard && npm run dev",
+    "dev:windows": "powershell -ExecutionPolicy Bypass -File scripts/start-dev.ps1",
+    "dev:windows:force": "powershell -ExecutionPolicy Bypass -File scripts/start-dev.ps1 -Force",
+    "dev:windows:clean": "powershell -ExecutionPolicy Bypass -File scripts/start-dev.ps1 -Clean",
     "server": "cd server && npm start",
     "build": "cd mondabot-dashboard && npm run build",
+    "start": "cd mondabot-dashboard && npm start",
+    "clean": "rm -rf .next && rm -rf node_modules/.cache && cd mondabot-dashboard && rm -rf .next out node_modules && cd ../server && rm -rf node_modules",
+    "reset": "npm run clean && npm install",
+    "health-check": "curl -f http://localhost:3001/health && curl -f http://localhost:3000",
     "check-server": "node scripts/check-server.js",
     "setup": "npm install && cd server && npm install && cd ../mondabot-dashboard && npm install",
     "check-env": "node -r dotenv/config -e \"require('dotenv').config({ path: 'server/.env' }); console.log('Checking environment...'); const required = ['AIRTABLE_API_KEY', 'AIRTABLE_BASE_ID']; const missing = required.filter(v => !process.env[v]); if (missing.length) { console.error('❌ Missing required env vars:', missing.join(', ')); console.error('📄 Please check your .env file in the server directory'); process.exit(1); } else { console.log('✅ All required environment variables are set'); }\"",
     "health": "npm run check-env && npm run check-server && echo '🎉 All systems are healthy!'",
-    "clean": "cd mondabot-dashboard && rm -rf .next out node_modules && cd ../server && rm -rf node_modules",
     "fresh-install": "npm run clean && npm run setup"
   },
   "dependencies": {
@@ -22,6 +31,7 @@
     "swr": "^2.3.3"
   },
   "devDependencies": {
-    "concurrently": "^9.2.0"
+    "concurrently": "^9.2.0",
+    "wait-on": "^7.2.0"
   }
 }

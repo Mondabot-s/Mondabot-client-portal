@@ -41,7 +41,7 @@ export const getStatusBadgeClasses = (status: string): string => {
 };
 
 // Legacy function for inline styles (keeping for backward compatibility)
-export const getStatusBadgeStyle = (status: string) => {
+export const getStatusBadgeStyle = () => {
   return {}; // No longer needed, using CSS classes instead
 };
 

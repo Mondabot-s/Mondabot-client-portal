@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { getStatusBadgeClasses, getStatusBadgeStyle } from '@/utils/statusTheme';
+import { getStatusBadgeClasses } from '@/utils/statusTheme';
 
 interface Task {
   id: string;
@@ -179,79 +179,38 @@ function TasksPageContent() {
 
     return (
         <div className="space-y-6">
-            {/* Navigation Header */}
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 mb-8">
-                <h2 className="font-bold text-lg mb-2">Page Navigation</h2>
-                <p className="text-sm text-gray-600 mb-4">Switch between different views of your project data.</p>
-                <div className="flex flex-wrap gap-4">
-                    <Link href="/automations" className="bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg shadow hover:bg-gray-700 transition-colors">
-                        Projects List
-                    </Link>
-                    <span className="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg shadow">
-                        Global Tasks View (Current)
-                    </span>
-                </div>
-            </div>
-
             {/* Project Detail Navigation */}
             {projectFilter && (
                 <div className="mb-8">
                     <Link href="/tasks" className="text-indigo-600 hover:text-indigo-800 font-semibold text-sm mb-4 inline-block">
                         ← Back to All Tasks
                     </Link>
-                    <div className="md:flex md:items-center md:justify-between">
-                        <div className="min-w-0 flex-1">
-                            <h1 className="text-3xl font-bold text-gray-900">{getCurrentProjectName()}</h1>
-                            <p className="mt-2 text-lg text-gray-600">A detailed view of all tasks for this project.</p>
-                        </div>
-                        <div className="mt-4 md:mt-0">
-                            {(() => {
-                                const project = getProjectById(projectFilter);
-                                if (!project) return null;
-                                
-                                return (
-                                    <span 
-                                        className={getStatusBadgeClasses(project.status)}
-                                    >
-                                        {project.status}
-                                    </span>
-                                );
-                            })()}
-                        </div>
-                    </div>
                 </div>
             )}
 
-            {/* Global Tasks Header */}
-            {!projectFilter && (
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900">Global Tasks Board</h1>
-                    <p className="mt-2 text-lg text-gray-600">A high-level overview of all tasks across all active projects.</p>
-                </div>
-            )}
-
-            {/* Kanban Board */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {renderKanbanColumn('To Do', 'TO DO')}
-                {renderKanbanColumn('In Progress', 'IN PROGRESS')}
-                {renderKanbanColumn('Done', 'DONE')}
-            </div>
-
-            {/* Empty State */}
-            {getFilteredTasks().length === 0 && (
-                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 text-center">
-                    <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No Tasks Found</h3>
-                    <p className="text-gray-600">
-                        {projectFilter 
-                            ? 'No tasks found for this project.' 
-                            : 'No tasks are currently available in your Airtable database.'
-                        }
+            {/* Header */}
+            <div className="flex justify-between items-center">
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900">
+                        {projectFilter ? `${getCurrentProjectName()} Tasks` : 'Global Tasks Board'}
+                    </h1>
+                    <p className="text-gray-600 mt-1">
+                        {projectFilter ? 'Tasks for this specific project' : 'All tasks across all projects'}
                     </p>
                 </div>
-            )}
+                {!projectFilter && (
+                    <div className="text-sm text-gray-500">
+                        Total: {tasks.length} tasks
+                    </div>
+                )}
+            </div>
+
+            {/* Kanban Board */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {renderKanbanColumn('To Do', 'To Do')}
+                {renderKanbanColumn('In Progress', 'In Progress')}
+                {renderKanbanColumn('Done', 'Done')}
+            </div>
         </div>
     );
 }

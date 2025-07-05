@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
@@ -80,18 +81,16 @@ export default function Sidebar() {
       <div>
         {/* Brand */}
         <div style={{ marginBottom: '40px' }}>
-          <h1
+          <Image
+            src="/Banner-dark.svg"
+            alt="Mondabot"
+            width={200}
+            height={41}
             style={{
-              color: 'white',
-              fontSize: '1.5rem',
-              fontWeight: 700,
-              letterSpacing: '0.05em',
-              textAlign: 'left',
-              margin: 0,
+              maxWidth: '100%',
+              height: 'auto',
             }}
-          >
-            Mondabot
-          </h1>
+          />
         </div>
 
         {/* Navigation */}

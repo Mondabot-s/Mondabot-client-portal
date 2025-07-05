@@ -1,0 +1,215 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Premium Project Management Interface Styles */
+
+/* Card animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.project-card {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Progress bar animation */
+.progress-fill {
+  transition: width 0.3s ease-out;
+}
+
+/* Hover effects */
+.project-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Focus styles for accessibility */
+.project-card:focus-within {
+  outline: 2px solid #170F3A;
+  outline-offset: 2px;
+}
+
+/* Custom scrollbar for filter tabs */
+.filter-tabs::-webkit-scrollbar {
+  height: 4px;
+}
+
+.filter-tabs::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 2px;
+}
+
+.filter-tabs::-webkit-scrollbar-thumb {
+  background: #170F3A;
+  border-radius: 2px;
+}
+
+.filter-tabs::-webkit-scrollbar-thumb:hover {
+  background: #0f0a2e;
+}
+
+/* Status badge animations */
+.status-badge {
+  transition: all 0.2s ease;
+}
+
+.status-badge:hover {
+  transform: scale(1.05);
+}
+
+/* Search input focus effect */
+.search-input:focus {
+  box-shadow: 0 0 0 3px rgba(23, 15, 58, 0.1);
+}
+
+/* Dropdown animation */
+.dropdown-enter {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+.dropdown-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* Loading skeleton pulse animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Responsive breakpoints for mobile */
+@media (max-width: 768px) {
+  .project-card {
+    padding: 1rem;
+  }
+  
+  .project-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .filter-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .progress-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .project-card {
+    border: 2px solid #000;
+  }
+  
+  .project-card:hover {
+    border-color: #170F3A;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .project-card {
+    animation: none;
+  }
+  
+  .progress-fill {
+    transition: none;
+  }
+  
+  .project-card:hover {
+    transform: none;
+  }
+}
+
+/* Custom utilities */
+.text-shadow-sm {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.backdrop-blur-xs {
+  backdrop-filter: blur(2px);
+}
+
+/* Status colors as CSS custom properties */
+:root {
+  --status-building: #EC4899;
+  --status-testing: #007AFF;
+  --status-review: #FF6B35;
+  --status-live: #34C759;
+  --brand-primary: #170F3A;
+}
+
+/* Custom status badge styles */
+.bg-status-building {
+  background-color: var(--status-building);
+}
+
+.bg-status-testing {
+  background-color: var(--status-testing);
+}
+
+.bg-status-review {
+  background-color: var(--status-review);
+}
+
+.bg-status-live {
+  background-color: var(--status-live);
+}
+
+.text-status-building {
+  color: var(--status-building);
+}
+
+.text-status-testing {
+  color: var(--status-testing);
+}
+
+.text-status-review {
+  color: var(--status-review);
+}
+
+.text-status-live {
+  color: var(--status-live);
+}
+
+/* Gradient backgrounds for premium feel */
+.gradient-bg {
+  background: linear-gradient(135deg, #170F3A 0%, #2D1B69 100%);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #170F3A 0%, #2D1B69 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glass morphism effect */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+} 
