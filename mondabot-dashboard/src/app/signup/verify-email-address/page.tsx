@@ -5,6 +5,16 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
+interface ClerkError {
+  message: string;
+  longMessage?: string;
+  code?: string;
+}
+
+interface ErrorWithClerkErrors {
+  errors?: ClerkError[];
+}
+
 export default function VerifyEmailPage() {
   const { isLoaded, signUp, setActive } = useSignUp();
   const [code, setCode] = useState('');
@@ -31,9 +41,10 @@ export default function VerifyEmailPage() {
         console.error('Sign up not complete:', completeSignUp);
         setError('Verification failed. Please try again.');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error:', err);
-      setError(err.errors?.[0]?.message || 'Invalid verification code. Please try again.');
+      const clerkError = err as ErrorWithClerkErrors;
+      setError(clerkError.errors?.[0]?.message || 'Invalid verification code. Please try again.');
     } finally {
       setIsVerifying(false);
     }
@@ -46,7 +57,7 @@ export default function VerifyEmailPage() {
       await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
       setError('');
       // You could add a success message here
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error resending code:', err);
       setError('Failed to resend code. Please try again.');
     }
@@ -91,7 +102,7 @@ export default function VerifyEmailPage() {
           </h1>
           
           <p className="text-xl text-gray-300 mb-12 leading-relaxed">
-            We've sent a verification code to your email address. 
+            We&apos;ve sent a verification code to your email address. 
             Please check your inbox and enter the code below.
           </p>
         </div>
@@ -160,7 +171,7 @@ export default function VerifyEmailPage() {
 
             <div className="text-center">
               <p className="text-sm text-gray-600">
-                Didn't receive the code?{' '}
+                Didn&apos;t receive the code?{' '}
                 <button
                   type="button"
                   onClick={handleResendCode}
