@@ -24,8 +24,12 @@ export default function DevHealthCheck() {
 
     const checkHealth = async () => {
       try {
-        // Check backend health
-        const backendResponse = await fetch('/api/health');
+        // Check backend directly (avoid proxy loop)
+        const backendResponse = await fetch('http://localhost:3001/health', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
         const frontendHealthy = window.location.port === '3000';
         
         setStatus({
@@ -35,6 +39,8 @@ export default function DevHealthCheck() {
 
         if (!backendResponse.ok || !frontendHealthy) {
           setShowError(true);
+        } else {
+          setShowError(false);
         }
       } catch (error) {
         console.error('Health check failed:', error);
@@ -52,7 +58,7 @@ export default function DevHealthCheck() {
 
   return (
     <>
-      {/* Status Bar */}
+      {/* Status indicators */}
       <div className="fixed bottom-4 right-4 z-50 flex gap-2">
         <div className={`px-3 py-1 rounded-full text-xs font-medium ${
           status.backend === 'connected' ? 'bg-green-100 text-green-800' :
@@ -69,7 +75,7 @@ export default function DevHealthCheck() {
         </div>
       </div>
 
-      {/* Error Modal */}
+      {/* Error modal */}
       {showError && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-xl max-w-md">
@@ -100,10 +106,10 @@ export default function DevHealthCheck() {
                 Dismiss
               </button>
               <button
-                onClick={() => window.location.href = 'http://localhost:3000'}
+                onClick={() => window.location.reload()}
                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
               >
-                Go to localhost:3000
+                Retry
               </button>
             </div>
           </div>

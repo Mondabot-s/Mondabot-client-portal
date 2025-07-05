@@ -31,11 +31,14 @@ app.use(express.json());
 const corsOptions = {
   origin: [
     'http://localhost:3000',
+    'http://localhost:3001',
     'http://localhost:5173',
-    process.env.FRONTEND_URL || 'http://localhost:3000'
+    process.env.FRONTEND_URL,
+    process.env.RAILWAY_STATIC_URL,
+    process.env.RAILWAY_PUBLIC_DOMAIN
   ].filter(Boolean),
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept'],
   credentials: true
 };
 
@@ -85,8 +88,11 @@ try {
     cors: {
       origin: [
         'http://localhost:3000',
+        'http://localhost:3001',
         'http://localhost:5173',
-        process.env.FRONTEND_URL || 'http://localhost:3000'
+        process.env.FRONTEND_URL,
+        process.env.RAILWAY_STATIC_URL,
+        process.env.RAILWAY_PUBLIC_DOMAIN
       ].filter(Boolean),
       methods: ['GET', 'POST'],
       credentials: true
@@ -110,16 +116,22 @@ try {
 
 // Health check endpoint - ALWAYS WORKS
 app.get('/health', (req, res) => {
-  res.json({
-    status: 'running',
+  console.log('Health check requested');
+  res.status(200).json({
+    status: 'ok',
     timestamp: new Date().toISOString(),
+    port: PORT,
+    environment: process.env.NODE_ENV || 'development',
     uptime: process.uptime(),
-    environment: {
-      hasAirtableKey: !!process.env.AIRTABLE_API_KEY,
-      hasBaseId: !!process.env.AIRTABLE_BASE_ID,
-      airtableReady: !!base,
-      socketIoReady: !!io
-    }
+    airtable: {
+      apiKey: process.env.AIRTABLE_API_KEY ? 'configured' : 'missing',
+      baseId: process.env.AIRTABLE_BASE_ID ? 'configured' : 'missing',
+      ready: !!base
+    },
+    socketIo: {
+      ready: !!io
+    },
+    server: 'express-backend'
   });
 });
 
