@@ -600,6 +600,14 @@ if (process.env.NODE_ENV === 'production') {
       experimental: {
         ppr: false, // Explicitly set PPR to false to prevent the error
       },
+      amp: {
+        canonicalBase: '', // Add missing amp configuration
+      },
+      images: {
+        domains: [], // Add empty images configuration
+        unoptimized: false,
+      },
+      i18n: null, // Explicitly set i18n to null if not used
       env: {
         BACKEND_URL: process.env.BACKEND_URL || 'http://localhost:3001',
         RAILWAY_ENVIRONMENT: process.env.RAILWAY_ENVIRONMENT,
