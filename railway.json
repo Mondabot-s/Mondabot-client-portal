@@ -8,6 +8,7 @@
     "startCommand": "npm run railway:start",
     "healthcheckPath": "/health",
     "healthcheckTimeout": 300,
+    "healthcheckInterval": 30,
     "numReplicas": 1,
     "sleepApplication": false,
     "restartPolicyType": "ON_FAILURE",

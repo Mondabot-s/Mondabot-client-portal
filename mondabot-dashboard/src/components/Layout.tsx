@@ -9,13 +9,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   
+  // Always call the hook - React hooks must be called unconditionally
+  const { isSignedIn, isLoaded } = useAuth();
+  
   // Check if Clerk is available
   const isClerkAvailable = typeof window !== 'undefined' && 
     process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-  
-  // Only use Clerk hook if available
-  const clerkAuth = isClerkAvailable ? useAuth() : { isSignedIn: true, isLoaded: true };
-  const { isSignedIn, isLoaded } = clerkAuth;
   
   // Set mounted state after component mounts
   useEffect(() => {
@@ -34,8 +33,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Show loading until component is mounted and auth is loaded
-  if (!mounted || !isLoaded) {
+  // Show loading until component is mounted and auth is loaded (only if Clerk is available)
+  if (!mounted || (!isLoaded && isClerkAvailable)) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">

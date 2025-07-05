@@ -23,10 +23,13 @@
     "health": "npm run check-env && npm run check-server && echo '🎉 All systems are healthy!'",
     "fresh-install": "npm run clean && npm run setup",
     "check-ports": "powershell \"netstat -ano | findstr :3000; netstat -ano | findstr :3001\"",
+    "test-production": "set NODE_ENV=production && npm run railway:start",
+    "test-production:unix": "NODE_ENV=production npm run railway:start",
+    "test-railway": "node scripts/test-railway-build.js",
     "railway:build": "npm install && npm run build && cd server && npm install",
-    "railway:start": "concurrently --names \"API,WEB\" --prefix-colors \"blue,green\" \"npm run start:api\" \"npm run start:web\"",
-    "start:api": "cd server && API_PORT=3001 npm start",
-    "start:web": "cd mondabot-dashboard && PORT=3000 npm start",
+    "railway:start": "concurrently --names \"🚀API,🌐WEB\" --prefix-colors \"blue,green\" \"npm run start:api\" \"npm run start:web\"",
+    "start:api": "cd server && npm start",
+    "start:web": "cd mondabot-dashboard && npm start",
     "start:server": "cd server && npm start"
   },
   "dependencies": {

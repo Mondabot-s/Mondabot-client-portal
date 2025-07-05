@@ -535,24 +535,57 @@ app.get('/api/projects/:id', async (req, res) => {
   }
 });
 
-// Serve static files from Next.js build output
-app.use(express.static(path.join(__dirname, '../mondabot-dashboard/out')));
-
-// Catch-all handler: send back React's index.html file for any non-API routes
-app.get('*', (req, res, next) => {
-  // Skip API routes
-  if (req.path.startsWith('/api/') || req.path === '/health') {
-    return next();
-  }
+// Production static file serving for Next.js standalone builds
+if (process.env.NODE_ENV === 'production' || process.env.RAILWAY_ENVIRONMENT) {
+  console.log('🏭 Setting up production static file serving...');
   
-  // Serve the Next.js app for all other routes
-  res.sendFile(path.join(__dirname, '../mondabot-dashboard/out/index.html'), (err) => {
-    if (err) {
-      console.error('Error serving index.html:', err);
-      res.status(500).send('Error loading application');
+  // Serve Next.js static assets
+  app.use('/_next', express.static(path.join(__dirname, '../mondabot-dashboard/.next/static')));
+  
+  // Serve public assets
+  app.use(express.static(path.join(__dirname, '../mondabot-dashboard/public')));
+  
+  // Catch-all handler for client-side routing (production)
+  app.get('*', (req, res, next) => {
+    // Skip API routes and health check
+    if (req.path.startsWith('/api/') || req.path === '/health') {
+      return next();
     }
+    
+    // For production, serve the Next.js standalone app
+    const indexPath = path.join(__dirname, '../mondabot-dashboard/.next/server/app/index.html');
+    res.sendFile(indexPath, (err) => {
+      if (err) {
+        console.error('Error serving Next.js app:', err);
+        // Fallback to a basic HTML response
+        res.status(500).send(`
+          <!DOCTYPE html>
+          <html>
+            <head><title>Mondabot Dashboard</title></head>
+            <body>
+              <h1>Loading...</h1>
+              <p>If this persists, please check the server logs.</p>
+            </body>
+          </html>
+        `);
+      }
+    });
   });
-});
+} else {
+  // Development mode - let Next.js handle its own serving via proxy
+  console.log('🔧 Development mode - static files served by Next.js dev server');
+  
+  // Only handle catch-all for non-existent routes in development
+  app.get('*', (req, res, next) => {
+    // Skip API routes and health check
+    if (req.path.startsWith('/api/') || req.path === '/health') {
+      return next();
+    }
+    
+    // In development, redirect to the Next.js dev server
+    res.redirect(`http://localhost:3000${req.path}`);
+  });
+}
 
 // 404 handler
 app.use((req, res) => {
@@ -618,25 +651,56 @@ server.on('error', (error) => {
   }
 });
 
-// Graceful shutdown
+// Enhanced process monitoring for debugging
 process.on('SIGINT', () => {
-  console.log('\n👋 Shutting down gracefully...');
+  console.log('\n👋 Received SIGINT - Shutting down gracefully...');
   server.close(() => {
-    console.log('✅ Server closed');
+    console.log('✅ Server closed cleanly');
     process.exit(0);
   });
 });
 
-// Catch uncaught exceptions
+process.on('SIGTERM', () => {
+  console.log('\n👋 Received SIGTERM - Shutting down gracefully...');
+  server.close(() => {
+    console.log('✅ Server closed cleanly');
+    process.exit(0);
+  });
+});
+
+// Catch uncaught exceptions with detailed logging
 process.on('uncaughtException', (error) => {
-  console.error('💥 Uncaught Exception:', error);
-  console.error(error.stack);
-  process.exit(1);
+  console.error('\n💥 Uncaught Exception Details:');
+  console.error('   Error:', error.message);
+  console.error('   Stack:', error.stack);
+  console.error('   Code:', error.code);
+  console.error('   Signal:', error.signal);
+  console.error('   Time:', new Date().toISOString());
+  
+  // Give some time for logging before exit
+  setTimeout(() => {
+    process.exit(1);
+  }, 1000);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('💥 Unhandled Rejection at:', promise, 'reason:', reason);
-  process.exit(1);
+  console.error('\n💥 Unhandled Rejection Details:');
+  console.error('   Promise:', promise);
+  console.error('   Reason:', reason);
+  console.error('   Time:', new Date().toISOString());
+  
+  // Give some time for logging before exit
+  setTimeout(() => {
+    process.exit(1);
+  }, 1000);
+});
+
+// Monitor process exit events
+process.on('exit', (code) => {
+  console.log(`\n🔚 Process exiting with code: ${code}`);
+  if (code !== 0) {
+    console.log('   This was an unexpected exit!');
+  }
 });
 
 module.exports = { app, server, io }; 
