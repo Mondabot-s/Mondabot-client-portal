@@ -4,11 +4,9 @@ import { useUser } from '@clerk/nextjs';
 import { Bell, Plus, MessageCircle, AlertCircle, Zap, CheckCircle, Clock, Database, Mail } from 'lucide-react';
 import Image from 'next/image';
 
-const isClerkAvailable = typeof window !== 'undefined' && 
-    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 const isAuthEnabled = process.env.ENABLE_AUTHENTICATION === 'true';
 
-// A new component that uses hooks unconditionally
+// A component that uses Clerk hooks
 const UserSpecificContent = () => {
     const { user, isLoaded } = useUser();
 
@@ -242,7 +240,7 @@ const HomePageContent = ({ userName }: { userName: string }) => {
 
 // The main export determines whether to use Clerk or not
 export default function HomePage() {
-    if (isClerkAvailable && isAuthEnabled) {
+    if (isAuthEnabled) {
         return <UserSpecificContent />;
     }
     // Render a default state if auth is disabled

@@ -22,9 +22,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Check if Clerk is configured
-  const clerkPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-  
   const content = (
     <html lang="en">
       <body className={`${poppins.variable} font-sans page-background`}>
@@ -36,15 +33,10 @@ export default function RootLayout({
     </html>
   );
 
-  // Only wrap with ClerkProvider if key is available
-  if (clerkPublishableKey) {
-    return (
-      <ClerkProvider>
-        {content}
-      </ClerkProvider>
-    );
-  }
-
-  // Return content without Clerk if key is not available (build time)
-  return content;
+  // Always wrap with ClerkProvider - let individual components handle auth state
+  return (
+    <ClerkProvider>
+      {content}
+    </ClerkProvider>
+  );
 }
