@@ -549,14 +549,6 @@ app.get('/api/projects/:id', async (req, res) => {
   }
 });
 
-// 404 handler - This will now be handled by the Next.js catch-all in production
-app.use((req, res) => {
-  res.status(404).json({
-    error: 'Not found',
-    message: `Route ${req.method} ${req.path} does not exist on the Express server.`
-  });
-});
-
 // Final error handler
 app.use((err, req, res, next) => {
   console.error('💥 Unhandled Express error:', err);
