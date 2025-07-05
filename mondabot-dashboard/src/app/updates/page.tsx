@@ -2,7 +2,7 @@
 
 export default function UpdatesPage() {
     return (
-        <div className="min-h-screen bg-gray-50">
+        <>
             {/* Header */}
             <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
                 <h1 className="text-3xl font-bold text-gray-900">Project Timeline</h1>
@@ -105,6 +105,6 @@ export default function UpdatesPage() {
                     </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 } 

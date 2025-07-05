@@ -22,35 +22,136 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useTasks } from '../../hooks/useTasks';
+import { useUser } from '@clerk/nextjs';
 
 // Overview Section
 const OverviewSection = () => {
+  const { user, isLoaded } = useUser();
+  
+  // Get the user's first name, or default to 'Matthew'
+  const firstName = (user?.firstName) || 'Matthew';
+  
   return (
     <section id="overview" className="mb-16">
-      <header className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-text-primary">
-            Welcome to your Dashboard
-          </h1>
-          <p className="text-text-secondary">
-            AI Voice Automation + CRM Integration for Client ABC
-          </p>
-        </div>
-        <div className="flex items-center space-x-4">
-          <div className="p-2 rounded-full bg-white shadow-md">
-            <Icon icon={User} className="w-6 h-6 text-gray-500" />
+      {/* Welcome Message at Top */}
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome, {firstName}!</h1>
+        <p className="text-gray-600">Here's a quick overview of your active projects. Let's make some progress today.</p>
+      </div>
+
+      {/* Header with Search and Actions */}
+      <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+        <h2 className="text-2xl font-bold text-gray-900">Project Command Center</h2>
+        <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto">
+          <div className="relative flex-grow sm:flex-grow-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input 
+              type="text" 
+              placeholder="Search..." 
+              className="pl-10 pr-4 py-2 rounded-lg border w-full sm:w-64 focus:ring-2 focus:ring-[#d90077] focus:border-[#d90077] outline-none transition border-gray-300"
+            />
           </div>
-          <div className="p-2 rounded-full bg-primary text-white shadow-md">
-            <p className="font-bold text-lg">AI</p>
-          </div>
+          <button className="p-2 rounded-lg hover:bg-gray-100 transition relative">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-gray-600">
+              <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+              <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+            </svg>
+            <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse border-2 border-white"></span>
+          </button>
+          <button className="flex items-center space-x-2 px-4 py-2 rounded-lg text-white font-semibold transition bg-[#d90077] hover:bg-[#b80062]">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            <span className="hidden sm:inline">New Task</span>
+          </button>
         </div>
       </header>
 
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        {/* Active Automations */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-3xl font-bold text-gray-900">12</p>
+              <p className="text-sm text-gray-600">Active Automations</p>
+              <p className="text-xs text-green-600 mt-1">↗ +33.3% from last month</p>
+            </div>
+            <div className="p-3 rounded-full bg-purple-100">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-purple-600">
+                <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* Tasks Completed */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-3xl font-bold text-gray-900">156</p>
+              <p className="text-sm text-gray-600">Tasks Completed</p>
+              <p className="text-xs text-green-600 mt-1">↗ +12% this week</p>
+            </div>
+            <div className="p-3 rounded-full bg-green-100">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-green-600">
+                <polyline points="9 11 12 14 22 4"/>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* Time Saved */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-3xl font-bold text-gray-900">48h</p>
+              <p className="text-sm text-gray-600">Time Saved</p>
+              <p className="text-xs text-gray-500 mt-1">This month</p>
+            </div>
+            <div className="p-3 rounded-full bg-blue-100">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-blue-600">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* Active Integrations */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-3xl font-bold text-gray-900">8</p>
+              <p className="text-sm text-gray-600">Active Integrations</p>
+              <p className="text-xs text-gray-500 mt-1">All systems operational</p>
+            </div>
+            <div className="p-3 rounded-full bg-orange-100">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-orange-600">
+                <path d="M9 3L5 7m4 10l4 4"/>
+                <path d="M5 17l4-4"/>
+                <path d="M9 21l4-4"/>
+                <path d="M15 3l4 4"/>
+                <path d="M19 7l-4 4"/>
+                <path d="M15 21l-4-4"/>
+                <path d="M19 17l-4-4"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <div className="lg:col-span-2">
           <Card>
             <h2 className="text-xl font-semibold text-text-primary mb-4">
-              Welcome Video
+              Your Automation Journey
             </h2>
             <div className="relative aspect-video rounded-lg overflow-hidden">
               <iframe
@@ -64,18 +165,19 @@ const OverviewSection = () => {
               ></iframe>
             </div>
             <p className="text-sm text-text-secondary mt-2">
-              A personal message from our CEO explaining the automation process
-              and next steps.
+              Watch how we're transforming your business processes with AI-powered automation
             </p>
           </Card>
         </div>
-        <div>
+        
+        <div className="space-y-6">
+          {/* Your Dedicated Project Lead */}
           <Card>
             <h2 className="text-xl font-semibold text-text-primary mb-4">
-              Your Project Manager
+              Your Dedicated Project Lead
             </h2>
             <div className="flex items-center space-x-4 mb-4">
-              <div className="w-16 h-16 rounded-full overflow-hidden">
+              <div className="relative w-16 h-16 rounded-full overflow-hidden">
                 <Image 
                   src="/Sergio_Bernal.jpg" 
                   alt="Sergio Bernal" 
@@ -83,13 +185,15 @@ const OverviewSection = () => {
                   height={64}
                   className="w-full h-full object-cover"
                 />
+                {/* Green Online Indicator */}
+                <div className="absolute bottom-0 right-0 w-5 h-5 bg-green-500 rounded-full border-2 border-white"></div>
               </div>
               <div>
                 <h3 className="font-semibold text-text-primary">
                   Sergio Bernal
                 </h3>
                 <p className="text-sm text-text-secondary">
-                  Senior Project Manager
+                  CEO & Lead Strategist
                 </p>
               </div>
             </div>
@@ -104,32 +208,56 @@ const OverviewSection = () => {
                 </a>
               </div>
               <div className="flex items-center text-sm">
-                <Icon icon={Phone} className="w-5 h-5 mr-3" />
-                <span className="text-text-secondary">+34 634800790</span>
-              </div>
-              <div className="flex items-center text-sm">
-                <Icon icon={Calendar} className="w-5 h-5 mr-3" />
-                <a 
-                  href="https://calendly.com/mondabot/30min?month=2025-06"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-text-secondary hover:text-primary transition-colors cursor-pointer"
-                >
-                  Schedule a call
-                </a>
-              </div>
-              <div className="flex items-center text-sm">
-                <Icon icon={MessageSquare} className="w-5 h-5 mr-3" />
-                <a 
-                  href="https://www.linkedin.com/in/sergio-bernal-300816206/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-text-secondary hover:text-primary transition-colors cursor-pointer"
-                >
-                  WhatsApp
-                </a>
+                <Icon icon={Clock} className="w-5 h-5 mr-3" />
+                <span className="text-text-secondary">Available Mon-Fri, 9am-6pm CET</span>
               </div>
             </div>
+            <button className="w-full mt-4 py-2 rounded-lg text-white font-semibold transition hover:opacity-90 bg-[#d90077]">
+              Schedule a Call
+            </button>
+          </Card>
+
+          {/* Pending Your Review */}
+          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg">
+            <div className="flex">
+              <div className="py-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-yellow-500 mr-4">
+                  <path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+                  <path d="M12 9v4"/>
+                  <path d="M12 17h.01"/>
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-bold text-yellow-800">Pending Your Review</h3>
+                <p className="text-sm text-yellow-700 mt-1">Feedback is required on the WhatsApp Bot conversation flows before we can proceed to launch.</p>
+                <button className="mt-2 px-3 py-1 text-sm font-semibold bg-yellow-400 text-yellow-900 rounded-md hover:bg-yellow-500">
+                  Provide Feedback
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Upcoming Milestone */}
+          <Card>
+            <h3 className="font-bold text-lg mb-4 text-text-primary">Upcoming Milestone</h3>
+            <div className="flex items-center space-x-4 mb-4">
+              <div className="p-3 rounded-full bg-gray-100">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-gray-600">
+                  <circle cx="12" cy="12" r="10"/>
+                  <circle cx="12" cy="12" r="6"/>
+                  <circle cx="12" cy="12" r="2"/>
+                </svg>
+              </div>
+              <div>
+                <p className="font-semibold text-text-primary">Launch WhatsApp Support Bot</p>
+                <p className="text-sm text-text-secondary">Due in 3 days</p>
+                <div className="flex items-center mt-2 space-x-2">
+                  <span className="text-xs bg-green-500 text-white px-2 py-1 rounded-full">Backend ✓</span>
+                  <span className="text-xs bg-green-500 text-white px-2 py-1 rounded-full">Port ✓ 3000</span>
+                </div>
+              </div>
+            </div>
+            <p className="text-sm text-text-secondary">Automated customer support with AI-powered responses.</p>
           </Card>
         </div>
       </div>

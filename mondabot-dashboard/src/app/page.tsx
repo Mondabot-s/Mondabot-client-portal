@@ -1,23 +1,35 @@
 "use client";
 
 import { useUser } from '@clerk/nextjs';
+import { Search, Bell, Plus, Play, MessageCircle, Calendar, AlertCircle, Target, Zap, CheckCircle, Clock, Database, ArrowUpRight, Mail, Users } from 'lucide-react';
 import Image from 'next/image';
 
 export default function HomePage() {
-    // Always call the hook - React hooks must be called unconditionally
-    const { user, isLoaded } = useUser();
-    
-    // Check if Clerk is available
+    // Check if Clerk is available and authentication is enabled
     const isClerkAvailable = typeof window !== 'undefined' && 
         process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+    
+    const isAuthEnabled = process.env.ENABLE_AUTHENTICATION === 'true';
+    
+    // Only use Clerk hooks if available and auth is enabled
+    const clerkUser = (isClerkAvailable && isAuthEnabled) ? useUser() : { user: null, isLoaded: true };
+    const { user, isLoaded } = clerkUser;
 
-    // Show loading state while user data is being fetched (only if Clerk is available)
-    if (!isLoaded && isClerkAvailable) {
+    // Get user's first name with fallback
+    const getUserFirstName = () => {
+        if (user?.firstName) {
+            return user.firstName;
+        }
+        return 'Matthew'; // Default fallback name
+    };
+
+    // Show loading state only if auth is enabled and not loaded
+    if (isAuthEnabled && !isLoaded) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="text-center">
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl mb-4 shadow-lg">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#d90077]"></div>
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6A10AD]"></div>
                     </div>
                     <p className="text-gray-600 font-medium">Loading your dashboard...</p>
                 </div>
@@ -25,180 +37,204 @@ export default function HomePage() {
         );
     }
 
-    // Get the user's first name, or default to 'there'
-    const firstName = (isClerkAvailable && user?.firstName) || 'there';
-
     return (
-        <div className="min-h-screen bg-gray-50">
+        <>
             {/* Header */}
-            <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
-                <h1 className="text-3xl font-bold text-gray-900">Project Command Center</h1>
-                <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto">
-                    <div className="relative flex-grow sm:flex-grow-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400">
-                            <circle cx="11" cy="11" r="8"/>
-                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                        </svg>
-                        <input 
-                            type="text" 
-                            placeholder="Search..." 
-                            className="pl-10 pr-4 py-2 rounded-lg border w-full sm:w-64 focus:ring-2 focus:ring-[#d90077] focus:border-[#d90077] outline-none transition border-gray-300"
-                        />
-                    </div>
-                    <button className="p-2 rounded-lg hover:bg-gray-100 transition relative">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-gray-600">
-                            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
-                            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
-                        </svg>
-                        <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse border-2 border-white"></span>
+            <header className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between mb-4">
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900">Welcome, {getUserFirstName()}</h1>
+                    <p className="text-gray-600 mt-1">Here's your automation empire at a glance.</p>
+                </div>
+                <div className="flex items-center space-x-4 mt-4 sm:mt-0">
+                    <button className="p-2 rounded-lg hover:bg-gray-100 transition">
+                        <Bell className="w-5 h-5 text-gray-600" />
                     </button>
-                    <button className="flex items-center space-x-2 px-4 py-2 rounded-lg text-white font-semibold transition bg-[#d90077] hover:bg-[#b80062]">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-                            <line x1="12" y1="5" x2="12" y2="19"/>
-                            <line x1="5" y1="12" x2="19" y2="12"/>
-                        </svg>
-                        <span className="hidden sm:inline">New Task</span>
+                    <button className="flex items-center space-x-2 px-4 py-2 rounded-lg text-white font-semibold bg-[#6A10AD] hover:bg-[#7d1fc4] transition">
+                        <Plus className="w-5 h-5" />
+                        <span>Create New</span>
                     </button>
                 </div>
             </header>
 
-            {/* Main Content Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Left Column - Main Content */}
-                <div className="lg:col-span-2 space-y-8">
-                    {/* Welcome Section */}
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                        <h2 className="text-2xl font-bold mb-1 text-gray-900">Welcome, {firstName}!</h2>
-                        <p className="mb-4 text-gray-600">Here's a quick overview of your active projects. Let's make some progress today.</p>
-                        <div className="aspect-video bg-gray-200 rounded-lg overflow-hidden">
-                            <iframe 
-                                src="https://player.vimeo.com/video/1068762817?h=1234567890abcdef&title=0&byline=0&portrait=0"
-                                className="w-full h-full"
-                                frameBorder="0"
-                                allow="autoplay; fullscreen; picture-in-picture"
-                                allowFullScreen
-                            />
+            {/* Metrics Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+                <div className="bg-white p-5 rounded-xl border border-gray-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                    <div className="flex items-center justify-between mb-3">
+                        <p className="text-sm text-gray-600">Active Automations</p>
+                        <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <Zap className="w-6 h-6 text-purple-600" />
                         </div>
                     </div>
-
-                    {/* Statistics Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {/* Active Automations */}
-                        <div className="bg-white p-4 rounded-xl shadow-sm flex items-center space-x-4 border border-gray-200">
-                            <div className="p-3 rounded-full bg-[#d90077]/10">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-[#d90077]">
-                                    <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <p className="text-2xl font-bold text-gray-900">4</p>
-                                <p className="text-sm text-gray-600">Active Automations</p>
-                            </div>
-                        </div>
-
-                        {/* Tasks Completed */}
-                        <div className="bg-white p-4 rounded-xl shadow-sm flex items-center space-x-4 border border-gray-200">
-                            <div className="p-3 rounded-full bg-[#d90077]/10">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-[#d90077]">
-                                    <polyline points="9 11 12 14 22 4"/>
-                                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <p className="text-2xl font-bold text-gray-900">12</p>
-                                <p className="text-sm text-gray-600">Tasks Completed</p>
-                            </div>
-                        </div>
-
-                        {/* Active Integrations */}
-                        <div className="bg-white p-4 rounded-xl shadow-sm flex items-center space-x-4 border border-gray-200">
-                            <div className="p-3 rounded-full bg-[#d90077]/10">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-[#d90077]">
-                                    <path d="M9 3L5 7m4 10l4 4"/>
-                                    <path d="M5 17l4-4"/>
-                                    <path d="M9 21l4-4"/>
-                                    <path d="M15 3l4 4"/>
-                                    <path d="M19 7l-4 4"/>
-                                    <path d="M15 21l-4-4"/>
-                                    <path d="M19 17l-4-4"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <p className="text-2xl font-bold text-gray-900">8</p>
-                                <p className="text-sm text-gray-600">Active Integrations</p>
-                            </div>
-                        </div>
-                    </div>
+                    <p className="text-3xl font-bold text-gray-900">12</p>
+                    <p className="text-sm text-green-600 mt-2">↑ +33.3% from last month</p>
                 </div>
-
-                {/* Right Column - Sidebar Content */}
-                <div className="space-y-8">
-                    {/* Your Dedicated Project Lead */}
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                        <h3 className="font-bold text-lg mb-4 text-gray-900">Your Dedicated Project Lead</h3>
-                        <div className="flex items-center space-x-4">
-                            <div className="relative w-16 h-16">
-                                <Image 
-                                    src="/Sergio_Bernal.jpg" 
-                                    alt="Sergio Bernal" 
-                                    fill
-                                    className="rounded-full object-cover"
-                                />
-                            </div>
-                            <div>
-                                <p className="font-semibold text-base text-gray-900">Sergio Bernal</p>
-                                <p className="text-sm text-gray-600">CEO & Lead Strategist</p>
-                            </div>
+                <div className="bg-white p-5 rounded-xl border border-gray-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                    <div className="flex items-center justify-between mb-3">
+                        <p className="text-sm text-gray-600">Tasks Completed</p>
+                        <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                            <CheckCircle className="w-6 h-6 text-green-600" />
                         </div>
-                        <button className="w-full mt-4 py-2 rounded-lg text-white font-semibold transition hover:opacity-90 bg-[#d90077]">
-                            Schedule a Call
-                        </button>
+                    </div>
+                    <p className="text-3xl font-bold text-gray-900">156</p>
+                    <p className="text-sm text-green-600 mt-2">↑ +12% this week</p>
+                </div>
+                <div className="bg-white p-5 rounded-xl border border-gray-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                    <div className="flex items-center justify-between mb-3">
+                        <p className="text-sm text-gray-600">Time Saved</p>
+                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <Clock className="w-6 h-6 text-blue-600" />
+                        </div>
+                    </div>
+                    <p className="text-3xl font-bold text-gray-900">48h</p>
+                    <p className="text-sm text-gray-500 mt-2">This month</p>
+                </div>
+                <div className="bg-white p-5 rounded-xl border border-gray-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                    <div className="flex items-center justify-between mb-3">
+                        <p className="text-sm text-gray-600">Active Integrations</p>
+                        <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                            <Database className="w-6 h-6 text-orange-600" />
+                        </div>
+                    </div>
+                    <p className="text-3xl font-bold text-gray-900">8</p>
+                    <p className="text-sm text-gray-500 mt-2">All systems operational</p>
+                </div>
+            </div>
+
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Left Column */}
+                <div className="lg:col-span-2 space-y-5">
+                    {/* Video Section */}
+                    <div className="bg-white rounded-xl overflow-hidden border border-gray-100">
+                        <div className="p-5">
+                            <h2 className="text-xl font-bold text-gray-900 mb-2">Your Automation Journey</h2>
+                            <p className="text-gray-600 mb-4">Watch how we're transforming your business processes with AI-powered automation.</p>
+                        </div>
+                        <div className="aspect-video bg-black rounded-b-xl">
+                            <iframe 
+                                src="https://player.vimeo.com/video/1068762817?h=1234567890abcdef&title=0&byline=0&portrait=0&autoplay=0" 
+                                className="w-full h-full" 
+                                frameBorder="0" 
+                                allow="autoplay; fullscreen; picture-in-picture" 
+                                allowFullScreen
+                            ></iframe>
+                        </div>
                     </div>
 
-                    {/* Pending Review Alert */}
-                    <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg">
-                        <div className="flex">
-                            <div className="py-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-yellow-500 mr-4">
-                                    <path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
-                                    <path d="M12 9v4"/>
-                                    <path d="M12 17h.01"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <h3 className="font-bold text-yellow-800">Pending Your Review</h3>
-                                <p className="text-sm text-yellow-700 mt-1">
-                                    Feedback is required on the WhatsApp Bot conversation flows before we can proceed to launch.
-                                </p>
-                                <button className="mt-2 px-3 py-1 text-sm font-semibold bg-yellow-400 text-yellow-900 rounded-md hover:bg-yellow-500">
-                                    Provide Feedback
+                    {/* Action Required */}
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-5">
+                        <div className="flex items-start space-x-3">
+                            <AlertCircle className="w-6 h-6 text-yellow-600 mt-0.5 flex-shrink-0" />
+                            <div className="flex-1">
+                                <h3 className="font-bold text-gray-900">Action Required: WhatsApp Bot Review</h3>
+                                <p className="text-sm text-gray-700 mt-1">Your feedback on conversation flows is needed before launch. This will only take 5 minutes.</p>
+                                <button className="mt-3 px-4 py-2 bg-yellow-600 text-white text-sm font-semibold rounded-lg hover:bg-yellow-700 transition">
+                                    Review Now →
                                 </button>
                             </div>
                         </div>
                     </div>
 
-                    {/* Upcoming Milestone */}
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                        <h3 className="font-bold text-lg mb-4 text-gray-900">Upcoming Milestone</h3>
-                        <div className="flex items-center space-x-4">
-                            <div className="p-3 rounded-full bg-gray-100">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-gray-600">
-                                    <circle cx="12" cy="12" r="10"/>
-                                    <circle cx="12" cy="12" r="6"/>
-                                    <circle cx="12" cy="12" r="2"/>
-                                </svg>
+                    {/* Recent Activity */}
+                    <div className="bg-white rounded-xl border border-gray-100 p-5">
+                        <h3 className="text-lg font-bold text-gray-900 mb-4">Recent Activity</h3>
+                        <div className="space-y-3">
+                            <div className="flex items-start space-x-3">
+                                <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                                <div>
+                                    <p className="text-sm font-medium text-gray-900">Lead Generation Automation Activated</p>
+                                    <p className="text-xs text-gray-500">2 hours ago • LinkedIn Integration</p>
+                                </div>
                             </div>
-                            <div>
-                                <p className="font-semibold text-gray-900">Launch WhatsApp Support Bot</p>
-                                <p className="text-sm text-gray-600">Due in 3 days</p>
+                            <div className="flex items-start space-x-3">
+                                <div className="w-2 h-2 bg-orange-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                                <div>
+                                    <p className="text-sm font-medium text-gray-900">Email Campaign Performance Report Ready</p>
+                                    <p className="text-xs text-gray-500">5 hours ago • 34% Open Rate</p>
+                                </div>
+                            </div>
+                            <div className="flex items-start space-x-3">
+                                <div className="w-2 h-2 bg-purple-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                                <div>
+                                    <p className="text-sm font-medium text-gray-900">New Integration: Slack Connected</p>
+                                    <p className="text-xs text-gray-500">Yesterday • Team Notifications Enabled</p>
+                                </div>
                             </div>
                         </div>
-                        <p className="text-sm mt-3 text-gray-600">
-                            Automated customer support with AI-powered responses.
-                        </p>
+                    </div>
+                </div>
+
+                {/* Right Column */}
+                <div className="lg:col-span-1 space-y-5">
+                    {/* Strategic Partner */}
+                    <div className="bg-white rounded-xl border border-gray-100 p-5">
+                        <h3 className="font-bold text-lg mb-4 text-gray-900">Your Strategic Partner</h3>
+                        <div className="flex items-center space-x-4 mb-4">
+                            <div className="relative flex-shrink-0">
+                                <Image
+                                    src="/Sergio_Bernal.jpg"
+                                    alt="Sergio Bernal"
+                                    width={64}
+                                    height={64}
+                                    className="w-16 h-16 rounded-full object-cover"
+                                />
+                                <span className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></span>
+                            </div>
+                            <div>
+                                <p className="font-semibold text-gray-900">Sergio Bernal</p>
+                                <p className="text-sm text-gray-600">CEO & Lead Strategist</p>
+                            </div>
+                        </div>
+                        <div className="space-y-2 mb-4 text-sm">
+                            <div className="flex items-center text-gray-600">
+                                <Mail className="w-4 h-4 mr-2 flex-shrink-0" />
+                                sergio@mondabot.com
+                            </div>
+                            <div className="flex items-center text-gray-600">
+                                <Clock className="w-4 h-4 mr-2 flex-shrink-0" />
+                                Available Mon-Fri, 9am-6pm CET
+                            </div>
+                        </div>
+                        <a
+                            href="https://calendly.com/mondabot/30min?month=2025-07"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full py-2.5 rounded-lg text-white font-semibold bg-[#6A10AD] hover:bg-[#7d1fc4] transition flex items-center justify-center"
+                        >
+                            Schedule Strategy Call
+                        </a>
+                    </div>
+
+                    {/* Next Major Milestone */}
+                    <div className="bg-[#6A10AD] text-white rounded-xl p-5">
+                        <h3 className="font-bold text-lg mb-4">Next Major Milestone</h3>
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center space-x-3">
+                                <div className="p-2 bg-white/20 rounded-lg">
+                                    <MessageCircle className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <p className="font-semibold">WhatsApp Bot Launch</p>
+                                    <p className="text-sm opacity-90">Automated Customer Support</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="mb-4">
+                            <div className="flex justify-between text-sm mb-2">
+                                <span>Progress</span>
+                                <span>85%</span>
+                            </div>
+                            <div className="w-full bg-white/20 rounded-full h-2">
+                                <div className="h-2 rounded-full bg-white" style={{ width: '85%' }}></div>
+                            </div>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                            <span>Launches in 3 days</span>
+                            <span className="font-medium">High Priority</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 } 

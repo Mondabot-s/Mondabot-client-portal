@@ -12,13 +12,15 @@ export default function Sidebar() {
   const pathname = usePathname();
   const [hoveredItem, setHoveredItem] = useState(null);
   
-  // Check if Clerk is available
+  // Check if Clerk is available and authentication is enabled
   const isClerkAvailable = typeof window !== 'undefined' && 
     process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
   
-  // Only use Clerk hooks if available
-  const clerkUser = isClerkAvailable ? useUser() : { user: null };
-  const clerkInstance = isClerkAvailable ? useClerk() : { signOut: () => {} };
+  const isAuthEnabled = process.env.ENABLE_AUTHENTICATION === 'true';
+  
+  // Only use Clerk hooks if available and auth is enabled
+  const clerkUser = (isClerkAvailable && isAuthEnabled) ? useUser() : { user: null };
+  const clerkInstance = (isClerkAvailable && isAuthEnabled) ? useClerk() : { signOut: () => {} };
   
   const { user } = clerkUser;
   const { signOut } = clerkInstance;
@@ -79,12 +81,12 @@ export default function Sidebar() {
 
   // Handle sign out
   const handleSignOut = () => {
-    if (isClerkAvailable) {
+    if (isClerkAvailable && isAuthEnabled) {
       signOut();
     }
   };
 
-  // Get user initials
+  // Get user initials with fallback
   const getUserInitials = () => {
     if (user?.firstName && user?.lastName) {
       return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`;
@@ -95,10 +97,10 @@ export default function Sidebar() {
     if (user?.emailAddresses?.[0]?.emailAddress) {
       return user.emailAddresses[0].emailAddress.charAt(0).toUpperCase();
     }
-    return 'U';
+    return 'M'; // Default to 'M' for Mondabot
   };
 
-  // Get user display name
+  // Get user display name with fallback
   const getUserDisplayName = () => {
     if (user?.firstName && user?.lastName) {
       return `${user.firstName} ${user.lastName}`;
@@ -109,7 +111,15 @@ export default function Sidebar() {
     if (user?.emailAddresses?.[0]?.emailAddress) {
       return user.emailAddresses[0].emailAddress;
     }
-    return 'User';
+    return 'Demo User'; // Default fallback
+  };
+
+  // Get user email with fallback
+  const getUserEmail = () => {
+    if (user?.emailAddresses?.[0]?.emailAddress) {
+      return user.emailAddresses[0].emailAddress;
+    }
+    return 'demo@mondabot.com'; // Default fallback
   };
 
   return (
@@ -182,41 +192,39 @@ export default function Sidebar() {
               {getUserDisplayName()}
             </div>
             <div style={{ color: '#9CA3AF', fontSize: '12px' }}>
-              {user?.emailAddresses?.[0]?.emailAddress}
+              {getUserEmail()}
             </div>
           </div>
         </div>
         
-        {/* Sign Out Button */}
-        <button
-          onClick={handleSignOut}
-          style={{
-            width: '100%',
-            padding: '8px 16px',
-            borderRadius: '8px',
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
-            color: '#9CA3AF',
-            border: 'none',
-            cursor: 'pointer',
-            fontSize: '14px',
-            fontWeight: 500,
-            transition: 'all 0.2s ease',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.backgroundColor = 'rgba(205, 17, 116, 0.1)';
-            e.target.style.color = '#CD1174';
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-            e.target.style.color = '#9CA3AF';
-          }}
-        >
-          <i className="fas fa-sign-out-alt" style={{ marginRight: '8px' }}></i>
-          Sign Out
-        </button>
+        {/* Sign Out Button - only show if auth is enabled */}
+        {isAuthEnabled && (
+          <button
+            onClick={handleSignOut}
+            style={{
+              width: '100%',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              color: '#9CA3AF',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '12px',
+              fontWeight: 500,
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+              e.target.style.color = 'white';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+              e.target.style.color = '#9CA3AF';
+            }}
+          >
+            Sign Out
+          </button>
+        )}
       </div>
     </aside>
   );

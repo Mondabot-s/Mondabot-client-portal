@@ -12,9 +12,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   // Always call the hook - React hooks must be called unconditionally
   const { isSignedIn, isLoaded } = useAuth();
   
-  // Check if Clerk is available
+  // Check if Clerk is available and authentication is enabled
   const isClerkAvailable = typeof window !== 'undefined' && 
     process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  
+  const isAuthEnabled = process.env.ENABLE_AUTHENTICATION === 'true';
   
   // Set mounted state after component mounts
   useEffect(() => {
@@ -33,8 +35,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Show loading until component is mounted and auth is loaded (only if Clerk is available)
-  if (!mounted || (!isLoaded && isClerkAvailable)) {
+  // Show loading until component is mounted
+  if (!mounted) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -47,13 +49,29 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // If not signed in and Clerk is available, the middleware will handle the redirect
-  // This component only renders for authenticated users on protected routes
-  if (isClerkAvailable && !isSignedIn) {
-    return null;
+  // If authentication is enabled and Clerk is available, check auth status
+  if (isAuthEnabled && isClerkAvailable) {
+    // Show loading while auth is being checked
+    if (!isLoaded) {
+      return (
+        <div className="h-screen flex items-center justify-center bg-gray-50">
+          <div className="text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl mb-4 shadow-lg">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#d90077]"></div>
+            </div>
+            <p className="text-gray-600 font-medium">Checking authentication...</p>
+          </div>
+        </div>
+      );
+    }
+    
+    // If not signed in, the middleware will handle the redirect
+    if (!isSignedIn) {
+      return null;
+    }
   }
   
-  // Default layout with sidebar for authenticated users
+  // Default layout with sidebar (works with or without authentication)
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar Component */}
