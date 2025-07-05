@@ -11,8 +11,17 @@ import { useUser, useClerk } from '@clerk/nextjs';
 export default function Sidebar() {
   const pathname = usePathname();
   const [hoveredItem, setHoveredItem] = useState(null);
-  const { user } = useUser();
-  const { signOut } = useClerk();
+  
+  // Check if Clerk is available
+  const isClerkAvailable = typeof window !== 'undefined' && 
+    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  
+  // Only use Clerk hooks if available
+  const clerkUser = isClerkAvailable ? useUser() : { user: null };
+  const clerkInstance = isClerkAvailable ? useClerk() : { signOut: () => {} };
+  
+  const { user } = clerkUser;
+  const { signOut } = clerkInstance;
 
   /** Base link style */
   const linkStyle = {
@@ -70,7 +79,9 @@ export default function Sidebar() {
 
   // Handle sign out
   const handleSignOut = () => {
-    signOut();
+    if (isClerkAvailable) {
+      signOut();
+    }
   };
 
   // Get user initials

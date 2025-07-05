@@ -4,7 +4,13 @@ import { useUser } from '@clerk/nextjs';
 import Image from 'next/image';
 
 export default function HomePage() {
-    const { user, isLoaded } = useUser();
+    // Check if Clerk is available
+    const isClerkAvailable = typeof window !== 'undefined' && 
+        process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+    
+    // Only use Clerk hook if it's available
+    const clerkUser = isClerkAvailable ? useUser() : { user: null, isLoaded: true };
+    const { user, isLoaded } = clerkUser;
 
     // Show loading state while user data is being fetched
     if (!isLoaded) {

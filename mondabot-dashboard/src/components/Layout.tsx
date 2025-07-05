@@ -6,7 +6,14 @@ import Sidebar from './Sidebar.jsx';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { isSignedIn, isLoaded } = useAuth();
+  
+  // Check if Clerk is available
+  const isClerkAvailable = typeof window !== 'undefined' && 
+    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  
+  // Only use Clerk hook if available
+  const clerkAuth = isClerkAvailable ? useAuth() : { isSignedIn: true, isLoaded: true };
+  const { isSignedIn, isLoaded } = clerkAuth;
   
   // Check if current page is login, signup, or email verification
   const isAuthPage = pathname === '/login' || pathname === '/signup' || pathname.includes('/verify-email');
@@ -34,9 +41,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // If not signed in, the middleware will handle the redirect
+  // If not signed in and Clerk is available, the middleware will handle the redirect
   // This component only renders for authenticated users on protected routes
-  if (!isSignedIn) {
+  if (isClerkAvailable && !isSignedIn) {
     return null;
   }
   

@@ -22,16 +22,29 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <ClerkProvider>
-      <html lang="en">
-        <body className={`${poppins.variable} font-sans page-background`}>
-          <Layout>
-            {children}
-          </Layout>
-          <DevHealthCheck />
-        </body>
-      </html>
-    </ClerkProvider>
+  // Check if Clerk is configured
+  const clerkPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  
+  const content = (
+    <html lang="en">
+      <body className={`${poppins.variable} font-sans page-background`}>
+        <Layout>
+          {children}
+        </Layout>
+        <DevHealthCheck />
+      </body>
+    </html>
   );
+
+  // Only wrap with ClerkProvider if key is available
+  if (clerkPublishableKey) {
+    return (
+      <ClerkProvider>
+        {content}
+      </ClerkProvider>
+    );
+  }
+
+  // Return content without Clerk if key is not available (build time)
+  return content;
 }
