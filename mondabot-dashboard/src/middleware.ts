@@ -21,22 +21,40 @@ const isPublicRoute = createRouteMatcher([
 ])
 
 export default clerkMiddleware(async (auth, req) => {
-  // Allow all routes to work without authentication for now
-  // This ensures the dashboard loads properly
-  console.log('Middleware processing:', req.url);
+  // Check if authentication is enabled
+  const isAuthEnabled = process.env.ENABLE_AUTHENTICATION === 'true';
+  
+  // Check if Clerk is properly configured
+  const isClerkConfigured = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  
+  console.log('Middleware processing:', {
+    url: req.url,
+    authEnabled: isAuthEnabled,
+    clerkConfigured: !!isClerkConfigured,
+    isProtected: isProtectedRoute(req),
+    isPublic: isPublicRoute(req)
+  });
   
   // Only protect routes if:
-  // 1. Clerk is properly configured 
-  // 2. The route is not public
-  // 3. The route is marked as protected
-  // 4. User explicitly wants authentication (can be enabled later)
-  const shouldProtect = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && 
+  // 1. Authentication is enabled
+  // 2. Clerk is properly configured 
+  // 3. The route is not public
+  // 4. The route is marked as protected
+  const shouldProtect = isAuthEnabled && 
+                       isClerkConfigured &&
                        !isPublicRoute(req) && 
-                       isProtectedRoute(req) &&
-                       process.env.ENABLE_AUTHENTICATION === 'true'; // Add this env var to enable auth
+                       isProtectedRoute(req);
   
   if (shouldProtect) {
-    await auth.protect()
+    console.log('Protecting route:', req.url);
+    await auth.protect();
+  } else {
+    console.log('Not protecting route:', req.url, {
+      reason: !isAuthEnabled ? 'Auth disabled' : 
+              !isClerkConfigured ? 'Clerk not configured' :
+              isPublicRoute(req) ? 'Public route' :
+              !isProtectedRoute(req) ? 'Not protected route' : 'Unknown'
+    });
   }
 })
 

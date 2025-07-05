@@ -1,7 +1,8 @@
 # Stage 1: Build the application
 FROM node:18-alpine AS builder
 
-# Set working directory. This is the root directory of the project
+# Set working directory. This is the root directory of the project.
+
 WORKDIR /app
 
 # Copy all package.json and package-lock.json files
@@ -34,6 +35,7 @@ WORKDIR /app
 # Set environment to production
 ENV NODE_ENV=production
 ENV RAILWAY_ENVIRONMENT=production
+ENV ENABLE_AUTHENTICATION=true
 
 # Create a non-root user for security
 RUN addgroup --system --gid 1001 nodejs
