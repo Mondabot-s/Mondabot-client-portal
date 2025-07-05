@@ -45,6 +45,7 @@ COPY --from=builder /app/mondabot-dashboard/node_modules ./mondabot-dashboard/no
 # Copy the built Next.js application and the server code
 COPY --from=builder /app/mondabot-dashboard ./mondabot-dashboard
 COPY --from=builder /app/server ./server
+COPY --from=builder /app/scripts ./scripts
 COPY --from=builder /app/package.json ./package.json
 
 # Change ownership of the files to the non-root user
@@ -53,6 +54,5 @@ USER nextjs
 # Expose the port the server will run on (Railway will map this)
 EXPOSE 3001
 
-# The command to start the application
-# This runs your Express server, which in turn serves the Next.js app
-CMD ["node", "server/server.js"] 
+# The command to start the application using the production start script
+CMD ["npm", "run", "railway:start"] 
