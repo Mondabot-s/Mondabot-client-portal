@@ -2,10 +2,12 @@
 
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
+import { useEffect, useState } from 'react';
 import Sidebar from './Sidebar.jsx';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
   
   // Check if Clerk is available
   const isClerkAvailable = typeof window !== 'undefined' && 
@@ -14,6 +16,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   // Only use Clerk hook if available
   const clerkAuth = isClerkAvailable ? useAuth() : { isSignedIn: true, isLoaded: true };
   const { isSignedIn, isLoaded } = clerkAuth;
+  
+  // Set mounted state after component mounts
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   // Check if current page is login, signup, or email verification
   const isAuthPage = pathname === '/login' || pathname === '/signup' || pathname.includes('/verify-email');
@@ -27,8 +34,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Wait for auth to load
-  if (!isLoaded) {
+  // Show loading until component is mounted and auth is loaded
+  if (!mounted || !isLoaded) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
