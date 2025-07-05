@@ -12,8 +12,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   // Always call useAuth since ClerkProvider is always available
   const { isSignedIn, isLoaded } = useAuth();
   
-  // Check if authentication is enabled
-  const isAuthEnabled = process.env.ENABLE_AUTHENTICATION === 'true';
+  // Check if authentication is enabled (using NEXT_PUBLIC_ prefix)
+  const isAuthEnabled = process.env.NEXT_PUBLIC_ENABLE_AUTHENTICATION === 'true';
   
   // Set mounted state after component mounts
   useEffect(() => {

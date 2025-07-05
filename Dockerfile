@@ -35,7 +35,7 @@ WORKDIR /app
 # Set environment to production
 ENV NODE_ENV=production
 ENV RAILWAY_ENVIRONMENT=production
-ENV ENABLE_AUTHENTICATION=true
+ENV NEXT_PUBLIC_ENABLE_AUTHENTICATION=true
 
 # Create a non-root user for security
 RUN addgroup --system --gid 1001 nodejs

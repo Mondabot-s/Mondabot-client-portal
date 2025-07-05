@@ -21,8 +21,8 @@ const isPublicRoute = createRouteMatcher([
 ])
 
 export default clerkMiddleware(async (auth, req) => {
-  // Check if authentication is enabled
-  const isAuthEnabled = process.env.ENABLE_AUTHENTICATION === 'true';
+  // Check if authentication is enabled (using NEXT_PUBLIC_ prefix for client-side access)
+  const isAuthEnabled = process.env.NEXT_PUBLIC_ENABLE_AUTHENTICATION === 'true';
   
   // Check if Clerk is properly configured
   const isClerkConfigured = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;

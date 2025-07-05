@@ -12,18 +12,15 @@ export default function Sidebar() {
   const pathname = usePathname();
   const [hoveredItem, setHoveredItem] = useState(null);
   
-  // Check if Clerk is available and authentication is enabled
-  const isClerkAvailable = typeof window !== 'undefined' && 
-    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  // Check if authentication is enabled (using NEXT_PUBLIC_ prefix)
+  const isAuthEnabled = process.env.NEXT_PUBLIC_ENABLE_AUTHENTICATION === 'true';
   
-  const isAuthEnabled = process.env.ENABLE_AUTHENTICATION === 'true';
+  // Check if Clerk is properly configured
+  const isClerkConfigured = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
   
-  // Only use Clerk hooks if available and auth is enabled
-  const clerkUser = (isClerkAvailable && isAuthEnabled) ? useUser() : { user: null };
-  const clerkInstance = (isClerkAvailable && isAuthEnabled) ? useClerk() : { signOut: () => {} };
-  
-  const { user } = clerkUser;
-  const { signOut } = clerkInstance;
+  // Always use Clerk hooks since ClerkProvider is always available
+  const { user, isLoaded } = useUser();
+  const { signOut } = useClerk();
 
   /** Base link style */
   const linkStyle = {
@@ -80,44 +77,50 @@ export default function Sidebar() {
   ];
 
   // Handle sign out
-  const handleSignOut = () => {
-    if (isClerkAvailable && isAuthEnabled) {
-      signOut();
+  const handleSignOut = async () => {
+    if (isAuthEnabled && isClerkConfigured) {
+      await signOut();
     }
   };
 
   // Get user initials with fallback
   const getUserInitials = () => {
-    if (user?.firstName && user?.lastName) {
-      return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`;
-    }
-    if (user?.firstName) {
-      return user.firstName.charAt(0);
-    }
-    if (user?.emailAddresses?.[0]?.emailAddress) {
-      return user.emailAddresses[0].emailAddress.charAt(0).toUpperCase();
+    if (isAuthEnabled && isClerkConfigured && user) {
+      if (user.firstName && user.lastName) {
+        return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`;
+      }
+      if (user.firstName) {
+        return user.firstName.charAt(0);
+      }
+      if (user.emailAddresses?.[0]?.emailAddress) {
+        return user.emailAddresses[0].emailAddress.charAt(0).toUpperCase();
+      }
     }
     return 'M'; // Default to 'M' for Mondabot
   };
 
   // Get user display name with fallback
   const getUserDisplayName = () => {
-    if (user?.firstName && user?.lastName) {
-      return `${user.firstName} ${user.lastName}`;
-    }
-    if (user?.firstName) {
-      return user.firstName;
-    }
-    if (user?.emailAddresses?.[0]?.emailAddress) {
-      return user.emailAddresses[0].emailAddress;
+    if (isAuthEnabled && isClerkConfigured && user) {
+      if (user.firstName && user.lastName) {
+        return `${user.firstName} ${user.lastName}`;
+      }
+      if (user.firstName) {
+        return user.firstName;
+      }
+      if (user.emailAddresses?.[0]?.emailAddress) {
+        return user.emailAddresses[0].emailAddress;
+      }
     }
     return 'Demo User'; // Default fallback
   };
 
   // Get user email with fallback
   const getUserEmail = () => {
-    if (user?.emailAddresses?.[0]?.emailAddress) {
-      return user.emailAddresses[0].emailAddress;
+    if (isAuthEnabled && isClerkConfigured && user) {
+      if (user.emailAddresses?.[0]?.emailAddress) {
+        return user.emailAddresses[0].emailAddress;
+      }
     }
     return 'demo@mondabot.com'; // Default fallback
   };
@@ -198,7 +201,7 @@ export default function Sidebar() {
         </div>
         
         {/* Sign Out Button - only show if auth is enabled */}
-        {isAuthEnabled && (
+        {isAuthEnabled && isClerkConfigured && (
           <button
             onClick={handleSignOut}
             style={{
