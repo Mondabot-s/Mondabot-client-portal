@@ -26,8 +26,9 @@
     "test-production": "set NODE_ENV=production && npm run railway:start",
     "test-production:unix": "NODE_ENV=production npm run railway:start",
     "test-railway": "node scripts/test-railway-build.js",
+    "test-static": "node scripts/test-static-serving.js",
     "railway:build": "npm install && npm run build && cd server && npm install",
-    "railway:start": "concurrently --names \"🚀API,🌐WEB\" --prefix-colors \"blue,green\" \"npm run start:api\" \"npm run start:web\"",
+    "railway:start": "npm run start:api",
     "start:api": "cd server && npm start",
     "start:web": "cd mondabot-dashboard && npm start",
     "start:server": "cd server && npm start"

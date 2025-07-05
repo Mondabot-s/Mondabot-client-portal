@@ -539,8 +539,8 @@ app.get('/api/projects/:id', async (req, res) => {
 if (process.env.NODE_ENV === 'production' || process.env.RAILWAY_ENVIRONMENT) {
   console.log('🏭 Setting up production static file serving...');
   
-  // Serve Next.js static assets
-  app.use('/_next', express.static(path.join(__dirname, '../mondabot-dashboard/.next/static')));
+  // Serve Next.js static assets - CORRECT PATH for standalone builds
+  app.use('/_next/static', express.static(path.join(__dirname, '../mondabot-dashboard/.next/static')));
   
   // Serve public assets
   app.use(express.static(path.join(__dirname, '../mondabot-dashboard/public')));
@@ -552,19 +552,31 @@ if (process.env.NODE_ENV === 'production' || process.env.RAILWAY_ENVIRONMENT) {
       return next();
     }
     
-    // For production, serve the Next.js standalone app
-    const indexPath = path.join(__dirname, '../mondabot-dashboard/.next/server/app/index.html');
-    res.sendFile(indexPath, (err) => {
+    // For production, serve the Next.js standalone HTML
+    const htmlPath = path.join(__dirname, '../mondabot-dashboard/.next/server/app/index.html');
+    res.sendFile(htmlPath, (err) => {
       if (err) {
         console.error('Error serving Next.js app:', err);
+        console.error('Tried to serve:', htmlPath);
+        console.error('File exists:', require('fs').existsSync(htmlPath));
+        
         // Fallback to a basic HTML response
         res.status(500).send(`
           <!DOCTYPE html>
           <html>
-            <head><title>Mondabot Dashboard</title></head>
+            <head>
+              <title>Mondabot Dashboard</title>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1">
+            </head>
             <body>
-              <h1>Loading...</h1>
-              <p>If this persists, please check the server logs.</p>
+              <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #f9fafb;">
+                <div style="text-align: center;">
+                  <h1>Loading Mondabot...</h1>
+                  <p>Static file serving issue. Path: ${htmlPath}</p>
+                  <p>File exists: ${require('fs').existsSync(htmlPath)}</p>
+                </div>
+              </div>
             </body>
           </html>
         `);
@@ -605,9 +617,9 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-// Port configuration for Railway - Use API_PORT if set, otherwise fall back to PORT, then 3001
-const API_PORT = process.env.API_PORT || process.env.PORT || 3001;
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+// Port configuration for Railway - Railway sets PORT, use that as primary
+const API_PORT = process.env.PORT || process.env.API_PORT || 3001;
+const FRONTEND_URL = process.env.FRONTEND_URL || `http://localhost:${API_PORT}`;
 
 console.log(`🔧 Starting Express server on port ${API_PORT}`);
 console.log(`🌐 Frontend URL: ${FRONTEND_URL}`);
