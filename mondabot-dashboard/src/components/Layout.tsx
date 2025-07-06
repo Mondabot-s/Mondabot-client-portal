@@ -34,6 +34,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     setMounted(true);
   }, []);
   
+  // Handle authentication redirect - moved outside conditional to comply with hooks rules
+  useEffect(() => {
+    if (mounted && isAuthEnabled && isClerkConfigured && isLoaded && !isSignedIn) {
+      // Check if current page is login, signup, or email verification
+      const isAuthPage = pathname === '/login' || pathname === '/signup' || pathname.includes('/verify-email') || pathname.includes('/factor-one');
+      if (!isAuthPage) {
+        router.push('/login');
+      }
+    }
+  }, [mounted, isAuthEnabled, isClerkConfigured, isLoaded, isSignedIn, pathname, router]);
+  
   // Check if current page is login, signup, or email verification
   const isAuthPage = pathname === '/login' || pathname === '/signup' || pathname.includes('/verify-email') || pathname.includes('/factor-one');
   
@@ -76,13 +87,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       );
     }
     
-    // If not signed in, redirect to login instead of returning null
+    // If not signed in, show loading while redirect happens
     if (!isSignedIn) {
-      // Use useEffect to redirect to login
-      useEffect(() => {
-        router.push('/login');
-      }, [router]);
-      
       return (
         <div className="h-screen flex items-center justify-center bg-gray-50">
           <div className="text-center">
