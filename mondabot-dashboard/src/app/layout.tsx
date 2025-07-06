@@ -54,10 +54,10 @@ export default function RootLayout({
         }}
         signInUrl="/login"
         signUpUrl="/signup"
-        afterSignInUrl="/"
-        afterSignUpUrl="/"
-        signInFallbackRedirectUrl="/login"
-        signUpFallbackRedirectUrl="/signup"
+        afterSignInUrl="/dashboard"
+        afterSignUpUrl="/dashboard"
+        signInFallbackRedirectUrl="/dashboard"
+        signUpFallbackRedirectUrl="/dashboard"
       >
         {content}
       </ClerkProvider>

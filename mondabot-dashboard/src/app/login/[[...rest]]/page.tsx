@@ -106,11 +106,8 @@ export default function LoginPage() {
                 }
               }}
               signUpUrl="/signup"
-              afterSignInUrl="/"
-              afterSignUpUrl="/"
-              redirectUrl="/"
-              path="/login"
-              routing="path"
+              forceRedirectUrl="/dashboard"
+              fallbackRedirectUrl="/dashboard"
             />
           </div>
 
