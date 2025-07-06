@@ -56,6 +56,8 @@ export default function RootLayout({
         signUpUrl="/signup"
         afterSignInUrl="/"
         afterSignUpUrl="/"
+        signInFallbackRedirectUrl="/login"
+        signUpFallbackRedirectUrl="/signup"
       >
         {content}
       </ClerkProvider>

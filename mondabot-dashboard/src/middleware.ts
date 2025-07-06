@@ -47,7 +47,10 @@ export default clerkMiddleware(async (auth, req) => {
   
   if (shouldProtect) {
     console.log('Protecting route:', req.url);
-    await auth.protect();
+    await auth.protect({
+      unauthenticatedUrl: '/login',
+      unauthorizedUrl: '/login',
+    });
   } else {
     console.log('Not protecting route:', req.url, {
       reason: !isAuthEnabled ? 'Auth disabled' : 
