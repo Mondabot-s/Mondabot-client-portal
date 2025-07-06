@@ -1,9 +1,9 @@
 'use client';
 
-import { SignUp } from '@clerk/nextjs';
+import { SignIn } from '@clerk/nextjs';
 import Image from 'next/image';
 
-export default function SignUpPage() {
+export default function FactorOnePage() {
   return (
     <div className="min-h-screen flex">
       {/* Left Side - Branding */}
@@ -32,13 +32,13 @@ export default function SignUpPage() {
           </h1>
           
           <p className="text-xl text-gray-300 mb-12 leading-relaxed">
-            Join thousands of businesses automating their workflow with AI-powered intelligence. 
-            Start your journey today.
+            Secure your account with multi-factor authentication.
+            Your security is our priority.
           </p>
         </div>
       </div>
 
-      {/* Right Side - Signup Form */}
+      {/* Right Side - MFA Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gradient-to-br from-gray-50 to-white">
         <div className="w-full max-w-md">
           {/* Header */}
@@ -53,16 +53,16 @@ export default function SignUpPage() {
               />
             </div>
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              Get Started
+              Verify Your Identity
             </h2>
             <p className="text-gray-600">
-              Create your account to start automating your business
+              Please complete the multi-factor authentication to continue
             </p>
           </div>
 
-          {/* Clerk SignUp Component with Custom Styling */}
-          <div className="clerk-signup-container">
-            <SignUp 
+          {/* Clerk SignIn Component for MFA */}
+          <div className="clerk-signin-container">
+            <SignIn 
               appearance={{
                 elements: {
                   formButtonPrimary: 
@@ -77,18 +77,8 @@ export default function SignUpPage() {
                     'hidden',
                   headerSubtitle: 
                     'hidden',
-                  socialButtonsBlockButton: 
-                    'w-full flex items-center justify-center py-3 px-4 border border-gray-300 rounded-xl text-gray-700 font-medium bg-white hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md',
-                  dividerLine: 
-                    'bg-gray-300',
-                  dividerText: 
-                    'text-gray-500 text-sm',
-                  footerActionLink: 
-                    'text-[#d90077] hover:text-[#b80062] font-medium transition-colors hover:underline',
-                  identityPreviewEditButton: 
-                    'text-[#d90077] hover:text-[#b80062]',
-                  formFieldAction: 
-                    'text-[#d90077] hover:text-[#b80062] font-medium transition-colors hover:underline',
+                  otpCodeFieldInput: 
+                    'w-12 h-12 text-center border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d90077] focus:border-transparent transition-all duration-200 text-lg font-medium',
                   formFieldHintText: 
                     'text-gray-500 text-sm',
                   alertText: 
@@ -97,19 +87,13 @@ export default function SignUpPage() {
                     'text-green-600 text-sm',
                   formFieldWarningText: 
                     'text-yellow-600 text-sm',
-                  formFieldInputShowPasswordButton: 
-                    'text-gray-400 hover:text-gray-600 transition-colors',
-                  otpCodeFieldInput: 
-                    'w-12 h-12 text-center border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d90077] focus:border-transparent transition-all duration-200',
-                  formButtonReset: 
-                    'w-full py-3 px-4 border border-gray-300 rounded-xl text-gray-700 font-medium bg-white hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md',
+                  footerActionLink: 
+                    'text-[#d90077] hover:text-[#b80062] font-medium transition-colors hover:underline',
                 }
               }}
-              signInUrl="/login"
-              afterSignUpUrl="/"
               afterSignInUrl="/"
               redirectUrl="/"
-              path="/signup"
+              path="/login/factor-one"
               routing="path"
             />
           </div>
@@ -117,7 +101,7 @@ export default function SignUpPage() {
           {/* Contact Support */}
           <div className="mt-8 text-center">
             <p className="text-sm text-gray-600">
-              Need assistance?{' '}
+              Having trouble?{' '}
               <a
                 href="#"
                 className="text-[#d90077] hover:text-[#b80062] font-medium transition-colors hover:underline"
