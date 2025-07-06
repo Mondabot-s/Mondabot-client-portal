@@ -12,8 +12,8 @@ const nextConfig: NextConfig = {
     ];
   },
   
-  // CRITICAL: Must be 'standalone' for Railway
-  output: 'standalone',
+  // Remove standalone mode to fix Express integration
+  // The dual-server architecture requires traditional Next.js integration
   
   // CRITICAL: Add publicRuntimeConfig to prevent "Cannot convert undefined or null to object" error
   publicRuntimeConfig: {},

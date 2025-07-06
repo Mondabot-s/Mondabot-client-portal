@@ -654,8 +654,7 @@ if (process.env.NODE_ENV === 'production') {
     dev,
     dir: nextAppPath, // Points to the 'mondabot-dashboard' directory
     conf: {
-      distDir: '.next',
-      output: 'standalone'
+      distDir: '.next'
     }
   });
   const handle = nextApp.getRequestHandler();
@@ -678,6 +677,13 @@ if (process.env.NODE_ENV === 'production') {
       
       // Handle all other routes with Next.js
       console.log(`🎨 Serving Next.js route: ${req.method} ${req.path}`);
+      console.log(`Middleware processing: {`);
+      console.log(`  url: '${req.protocol}://${req.get('host')}${req.originalUrl}',`);
+      console.log(`  authEnabled: ${process.env.NEXT_PUBLIC_ENABLE_AUTHENTICATION === 'true'},`);
+      console.log(`  host: '${req.get('host')}',`);
+      console.log(`  userAgent: '${req.get('user-agent')}'`);
+      console.log(`}`);
+      
       return handle(req, res);
     });
     
