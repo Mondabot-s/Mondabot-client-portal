@@ -9,25 +9,34 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
+  const [authError, setAuthError] = useState(false);
   
   // Check if authentication is enabled and Clerk is configured
   const isAuthEnabled = process.env.NEXT_PUBLIC_ENABLE_AUTHENTICATION === 'true';
   const isClerkConfigured = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
   
-  // Always call useAuth hook to comply with React hooks rules
-  let authResult;
+  // Always call useAuth hook to comply with React hooks rules, but handle errors gracefully
+  let authResult: { isSignedIn: boolean; isLoaded: boolean } = { isSignedIn: false, isLoaded: true };
+  
   try {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    authResult = useAuth();
+    if (isAuthEnabled && isClerkConfigured) {
+      // Only call useAuth if authentication is enabled and configured
+      const clerkAuthResult = useAuth();
+      authResult = {
+        isSignedIn: clerkAuthResult.isSignedIn ?? false,
+        isLoaded: clerkAuthResult.isLoaded ?? true
+      };
+    }
   } catch (error) {
-    // If Clerk hooks fail (e.g., during build), use default values
+    // If Clerk hooks fail (e.g., during build or hydration), use default values
     console.warn('Clerk hooks not available:', error);
+    setAuthError(true);
     authResult = { isSignedIn: false, isLoaded: true };
   }
   
   // Only use auth results if authentication is enabled and Clerk is configured
-  const isSignedIn = (isAuthEnabled && isClerkConfigured) ? (authResult.isSignedIn ?? false) : false;
-  const isLoaded = (isAuthEnabled && isClerkConfigured) ? (authResult.isLoaded ?? true) : true;
+  const isSignedIn = (isAuthEnabled && isClerkConfigured && !authError) ? authResult.isSignedIn : false;
+  const isLoaded = (isAuthEnabled && isClerkConfigured && !authError) ? authResult.isLoaded : true;
   
   // Set mounted state after component mounts
   useEffect(() => {
@@ -36,14 +45,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   
   // Handle authentication redirect - moved outside conditional to comply with hooks rules
   useEffect(() => {
-    if (mounted && isAuthEnabled && isClerkConfigured && isLoaded && !isSignedIn) {
+    if (mounted && isAuthEnabled && isClerkConfigured && !authError && isLoaded && !isSignedIn) {
       // Check if current page is login, signup, or email verification
       const isAuthPage = pathname === '/login' || pathname === '/signup' || pathname.includes('/verify-email') || pathname.includes('/factor-one');
       if (!isAuthPage) {
         router.push('/login');
       }
     }
-  }, [mounted, isAuthEnabled, isClerkConfigured, isLoaded, isSignedIn, pathname, router]);
+  }, [mounted, isAuthEnabled, isClerkConfigured, authError, isLoaded, isSignedIn, pathname, router]);
   
   // Check if current page is login, signup, or email verification
   const isAuthPage = pathname === '/login' || pathname === '/signup' || pathname.includes('/verify-email') || pathname.includes('/factor-one');
@@ -72,7 +81,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }
 
   // If authentication is enabled and Clerk is configured, check auth status
-  if (isAuthEnabled && isClerkConfigured) {
+  if (isAuthEnabled && isClerkConfigured && !authError) {
     // Show loading while auth is being checked
     if (!isLoaded) {
       return (
@@ -100,6 +109,21 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
       );
     }
+  }
+  
+  // If there's an auth error, show a fallback message
+  if (authError && isAuthEnabled && isClerkConfigured) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl mb-4 shadow-lg">
+            <div className="text-2xl">⚠️</div>
+          </div>
+          <p className="text-gray-600 font-medium">Authentication temporarily unavailable</p>
+          <p className="text-gray-500 text-sm mt-2">Please refresh the page</p>
+        </div>
+      </div>
+    );
   }
   
   // Default layout with sidebar (works with or without authentication)

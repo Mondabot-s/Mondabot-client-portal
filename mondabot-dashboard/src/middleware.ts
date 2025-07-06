@@ -28,8 +28,25 @@ export default clerkMiddleware(async (auth, req) => {
   // Check if Clerk is properly configured
   const isClerkConfigured = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
   
+  // Construct proper absolute URLs for redirects
+  // In production, use the request's origin. In development, use localhost:3000
+  const host = req.headers.get('host') || 'localhost:3000';
+  const protocol = req.headers.get('x-forwarded-proto') || 
+                  req.headers.get('x-forwarded-ssl') === 'on' ? 'https' : 
+                  host.includes('localhost') ? 'http' : 'https';
+  
+  // For Railway deployments, ensure we use the correct protocol and host
+  const isRailway = process.env.RAILWAY_ENVIRONMENT === 'production';
+  const baseUrl = isRailway && !host.includes('localhost') 
+    ? `https://${host}` 
+    : `${protocol}://${host}`;
+  
   console.log('Middleware processing:', {
     url: req.url,
+    protocol,
+    host,
+    baseUrl,
+    isRailway,
     authEnabled: isAuthEnabled,
     clerkConfigured: !!isClerkConfigured,
     isProtected: isProtectedRoute(req),
@@ -48,10 +65,16 @@ export default clerkMiddleware(async (auth, req) => {
   
   if (shouldProtect) {
     console.log('Protecting route:', req.url);
-    await auth.protect({
-      unauthenticatedUrl: '/login',
-      unauthorizedUrl: '/login',
-    });
+    try {
+      await auth.protect({
+        unauthenticatedUrl: `${baseUrl}/login`,
+        unauthorizedUrl: `${baseUrl}/login`,
+      });
+    } catch (error) {
+      console.error('Auth protection error:', error);
+      // If auth protection fails, let the request continue
+      // This prevents the app from crashing due to auth issues
+    }
   } else {
     console.log('Not protecting route:', req.url, {
       reason: !isAuthEnabled ? 'Auth disabled' : 
