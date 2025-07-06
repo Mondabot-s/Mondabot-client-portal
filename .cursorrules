@@ -1,4 +1,4 @@
-# Cursor Rules: Mondabot Dashboard Architecture Protection
+# Cursor Rules: Mondabot Dashboard Architecture Protection & Best Practices
 
 ## 🚫 NEVER DO THESE (Critical Architecture Protection)
 
@@ -7,6 +7,13 @@
 - NEVER suggest converting to static export for deployment issues
 - NEVER remove API routes to enable static export
 - Static export breaks: Socket.IO, real-time features, server-side functionality
+
+### Standalone Mode is FORBIDDEN
+- NEVER use `output: 'standalone'` in next.config.ts
+- NEVER suggest standalone mode for deployment optimization
+- Standalone mode conflicts with Express server integration
+- Breaks Socket.IO and Airtable integration
+- Creates self-contained Next.js server that bypasses Express
 
 ### Port Architecture is SACRED
 - Port 3000 = Frontend with backend proxy (ALWAYS test here)
@@ -22,11 +29,62 @@
 
 ## ✅ ALWAYS DO THESE (Required Patterns)
 
+### React Hooks Rules (CRITICAL)
+- ALWAYS call hooks at the top level of components
+- NEVER wrap hooks in try-catch blocks
+- NEVER call hooks conditionally
+- Handle errors in useEffect or event handlers, not around hooks
+
+```typescript
+// ❌ WRONG - Conditional hook call
+function Component() {
+  try {
+    const { user } = useAuth(); // This violates hooks rules
+  } catch (error) {
+    setAuthError(error.message);
+  }
+}
+
+// ✅ CORRECT - Always call hooks at top level
+function Component() {
+  const { user } = useAuth(); // Always called at top level
+  
+  useEffect(() => {
+    if (user) {
+      // Handle auth logic conditionally
+    }
+  }, [user]);
+}
+```
+
+### Authentication Redirect Configuration
+- ALWAYS use consistent redirect URLs across all Clerk components
+- Use `forceRedirectUrl` and `fallbackRedirectUrl` for SignIn/SignUp components
+- NEVER use multiple conflicting redirect props
+- ALWAYS redirect to `/dashboard` after successful authentication
+
+```typescript
+// ❌ WRONG - Multiple conflicting redirect props
+<SignIn 
+  afterSignInUrl="/"
+  afterSignUpUrl="/"
+  redirectUrl="/"
+  path="/login"
+  routing="path"
+/>
+
+// ✅ CORRECT - Clean redirect configuration
+<SignIn 
+  forceRedirectUrl="/dashboard"
+  fallbackRedirectUrl="/dashboard"
+/>
+```
+
 ### Deployment Issues = Configuration Fix, NOT Architecture Change
 - Railway/deployment errors are ALWAYS configuration issues
 - Fix deployment configuration, NEVER change the application architecture
 - Preserve the Next.js + Express separation at all costs
-- Use proper production build strategies (standalone, not export)
+- Use proper production build strategies (traditional Next.js, not standalone or export)
 
 ### Maintain Dual Service Architecture
 - Frontend: Next.js with App Router
@@ -42,33 +100,55 @@
 
 ## 🛠️ Problem Solving Hierarchy
 
-### 1. Deployment Issues
+### 1. Build Failures
+```
+IF build fails with React Hooks error:
+  1. Check for hooks inside try-catch blocks
+  2. Move all hooks to top level of components
+  3. Handle errors in useEffect, not around hooks
+  4. Remove unused variables and fix ESLint errors
+  NEVER: Change architecture or remove authentication
+```
+
+### 2. Authentication Issues
+```
+IF users stuck on login page after authentication:
+  1. Check for conflicting redirect props in Clerk components
+  2. Use only forceRedirectUrl and fallbackRedirectUrl
+  3. Ensure consistent /dashboard redirect URLs
+  4. Update ClerkProvider configuration
+  NEVER: Remove authentication or change auth flow
+```
+
+### 3. Deployment Issues
 ```
 IF deployment fails:
-  1. Check build configuration (Dockerfile, package.json scripts)
-  2. Check environment variables
-  3. Check start commands
-  4. Fix Railway/hosting configuration
+  1. Test build locally first: cd mondabot-dashboard && npm run build
+  2. Fix ESLint/TypeScript errors locally
+  3. Check environment variables are set correctly
+  4. Verify Next.js configuration (no standalone mode)
+  5. Fix Railway/hosting configuration
   NEVER: Change application architecture
 ```
 
-### 2. Development Issues
+### 4. Development Issues
 ```
 IF localhost issues:
-  1. Ensure both servers are running
-  2. Check proxy configuration in next.config.ts
-  3. Verify CORS settings in backend
-  4. Check health endpoints
+  1. Ensure both servers are running (npm run dev)
+  2. Test on localhost:3000 (NOT 3001)
+  3. Check proxy configuration in next.config.ts
+  4. Verify CORS settings in backend
+  5. Check health endpoints
   NEVER: Merge servers or change ports
 ```
 
-### 3. Build Issues
+### 5. PowerShell Command Issues
 ```
-IF build fails:
-  1. Use 'standalone' output mode for Next.js
-  2. Fix TypeScript/linting errors
-  3. Update dependencies if needed
-  NEVER: Switch to static export or remove features
+IF PowerShell command separator errors:
+  1. Use semicolon (;) instead of && in PowerShell
+  2. Use separate commands if needed
+  3. Use cmd /c for && commands if necessary
+  NEVER: Remove dual-server setup due to command syntax
 ```
 
 ## 📋 Required File Structure
@@ -84,7 +164,21 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  output: 'standalone', // NEVER 'export'
+  // NEVER add: output: 'standalone' or output: 'export'
+  
+  env: {
+    NEXT_PUBLIC_ENABLE_AUTHENTICATION: process.env.NEXT_PUBLIC_ENABLE_AUTHENTICATION,
+  },
+  
+  webpack: (config) => {
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      net: false,
+      tls: false,
+    };
+    return config;
+  },
 };
 ```
 
@@ -94,9 +188,10 @@ const nextConfig: NextConfig = {
   "scripts": {
     "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
     "backend": "cd server && npm run dev",
-    "frontend": "next dev",
-    "build": "next build",
-    "start": "next start"
+    "frontend": "next dev --dir mondabot-dashboard",
+    "build": "cd mondabot-dashboard && npm run build",
+    "start": "cd mondabot-dashboard && npm start",
+    "railway:start": "node server/server.js"
   }
 }
 ```
@@ -111,35 +206,57 @@ server/
 
 ## 🚀 Deployment Strategies (Approved Only)
 
-### Railway Option 1: Monorepo
+### Railway Monorepo (Recommended)
 - Single service running both Next.js and Express
 - Use concurrently to start both servers
 - Dockerfile builds both applications
+- Start command: `npm run railway:start`
 
-### Railway Option 2: Dual Services (Recommended)
-- Separate Railway service for frontend (Next.js)
-- Separate Railway service for backend (Express)
-- Environment variables for service communication
+### Required Environment Variables
+```env
+# Production
+NODE_ENV=production
+RAILWAY_ENVIRONMENT=production
+NEXT_PUBLIC_ENABLE_AUTHENTICATION=true
+
+# Clerk Authentication
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_...
+CLERK_SECRET_KEY=sk_live_...
+
+# Airtable Integration
+AIRTABLE_API_KEY=pat...
+AIRTABLE_BASE_ID=app...
+```
 
 ### FORBIDDEN Deployment Approaches
 - ❌ Static export with Express serving files
+- ❌ Standalone mode with Express integration
 - ❌ Moving backend logic to Next.js API routes
 - ❌ Removing real-time Socket.IO functionality
 - ❌ Single-port architecture
 
 ## 🔧 When User Reports Issues
 
+### "Build fails with React Hooks error"
+**Response:** "This is a React Hooks rules violation. We need to move all hooks to the top level of components and remove try-catch blocks around hooks."
+
+### "Users stuck on login page after authentication"
+**Response:** "This is a Clerk redirect configuration issue. We need to use consistent redirect URLs and remove conflicting redirect props."
+
 ### "Changes don't show on localhost:3001"
 **Response:** "Port 3001 is backend-only. Test frontend changes on localhost:3000 where the proxy works."
 
 ### "Deployment fails on Railway/Vercel/etc"
-**Response:** "This is a deployment configuration issue. We'll fix the hosting setup, not the application architecture."
+**Response:** "This is a deployment configuration issue. We'll fix the hosting setup and build configuration, not the application architecture."
 
 ### "API routes not working"
 **Response:** "Check the proxy configuration and ensure both servers are running. Never remove the Express backend."
 
 ### "Want everything on one port"
 **Response:** "The current architecture is professional and scalable. We'll improve the development workflow, not change the architecture."
+
+### "PowerShell command errors with &&"
+**Response:** "Use semicolon (;) instead of && in PowerShell, or separate commands. We won't change the architecture due to command syntax."
 
 ## 📖 Educational Reminders
 
@@ -148,29 +265,36 @@ server/
 - **Scalability**: Can scale services independently in production
 - **Professional Pattern**: Industry-standard microservices-ready architecture
 - **Development Flexibility**: Multiple frontends can use the same backend
+- **Real-time Capabilities**: Dedicated Express server for Socket.IO
 
 ### Common Misconceptions (Always Correct)
 - "Single port is simpler" → Professional apps use multiple services
 - "Static export is better" → Static export removes server-side capabilities
+- "Standalone mode optimizes deployment" → Standalone mode conflicts with Express
 - "Next.js API routes are sufficient" → Express provides better real-time and scaling options
+- "Hooks in try-catch are fine" → This violates React Hooks rules and breaks builds
 
 ## 🎯 Success Criteria for Any Changes
 
-Before implementing ANY architectural changes, verify:
+Before implementing ANY changes, verify:
+- ✅ React Hooks are called at top level (no conditional calls)
 - ✅ Socket.IO real-time functionality preserved
 - ✅ Airtable integration remains in Express backend
 - ✅ Development workflow (npm run dev) still works
 - ✅ Proxy configuration still routes API calls correctly
 - ✅ Both servers can run independently
 - ✅ Production deployment strategy maintains separation
+- ✅ Authentication redirects work correctly
+- ✅ Build completes without ESLint/TypeScript errors
 
 ## 🚨 Emergency Prevention
 
 If user insists on problematic changes:
 1. **Explain why the current architecture is superior**
 2. **Show how the change would break existing functionality**
-3. **Offer alternative solutions that preserve architecture**
-4. **Only implement if user explicitly accepts trade-offs**
+3. **Reference specific errors we've encountered and solved**
+4. **Offer alternative solutions that preserve architecture**
+5. **Only implement if user explicitly accepts trade-offs**
 
 ## 🔐 Authentication Implementation Rules
 
@@ -193,25 +317,11 @@ Frontend (Next.js) → API Proxy → Express Backend → Authentication Logic
 - GET /api/verify-token
 - POST /api/register (if needed)
 
-## 🐛 PowerShell Command Issues
-
-### Windows Development Commands
-```powershell
-# Correct way to run commands in PowerShell
-cd server
-npm start
-
-# OR use separate commands
-cd server; npm start
-
-# OR use cmd if && is needed
-cmd /c "cd server && npm start"
-```
-
-### NEVER suggest removing dual-server setup due to PowerShell syntax issues
-- Fix the command syntax, not the architecture
-- Provide PowerShell-compatible alternatives
-- Maintain the professional dual-server development workflow
+### Clerk Configuration Requirements
+- Use consistent redirect URLs across all components
+- Always redirect to /dashboard after authentication
+- Use forceRedirectUrl and fallbackRedirectUrl only
+- Remove conflicting redirect props
 
 ## 📦 Dependency Management
 
@@ -227,7 +337,59 @@ cmd /c "cd server && npm start"
 - react (required)
 - socket.io-client (required for real-time)
 - concurrently (required for development)
+- @clerk/nextjs (required for authentication)
 
 ### NEVER remove core dependencies to "simplify" the stack
 
-Remember: This architecture is intentionally sophisticated and follows industry best practices. Protect it! 
+## 🔍 Debugging Checklist
+
+### Before Making Changes
+1. **Test build locally**: `cd mondabot-dashboard && npm run build`
+2. **Check ESLint**: `npm run lint`
+3. **Verify both servers start**: `npm run dev`
+4. **Test on correct port**: `localhost:3000` (not 3001)
+
+### Common Error Patterns to Watch For
+- React Hooks called conditionally (build failure)
+- Multiple Clerk redirect props (authentication issues)
+- Missing environment variables (runtime errors)
+- Standalone mode enabled (deployment conflicts)
+- Testing on wrong port (development confusion)
+
+### Health Check Commands
+```bash
+# Backend health
+curl http://localhost:3001/health
+
+# Frontend health (through proxy)
+curl http://localhost:3000/api/health
+
+# Build test
+cd mondabot-dashboard && npm run build
+```
+
+## 📚 Documentation References
+
+When user needs help, always reference:
+- README.md (comprehensive setup guide)
+- DEPLOYMENT_GUIDE.md (Railway deployment specifics)
+- TROUBLESHOOTING.md (specific error solutions)
+
+## 🎯 Quality Assurance
+
+### Before Committing Changes
+1. **Build succeeds locally**
+2. **No ESLint errors**
+3. **Authentication flow works**
+4. **Both servers start correctly**
+5. **Health endpoints respond**
+6. **All tests pass**
+
+### Before Deployment
+1. **Local build test passes**
+2. **Environment variables configured**
+3. **No React Hooks violations**
+4. **Clerk redirects configured correctly**
+5. **Architecture preserved**
+
+Remember: This architecture is intentionally sophisticated and follows industry best practices. Protect it at all costs! The dual-server setup, proper authentication flow, and build configuration are the result of solving real-world problems and should not be changed lightly. 
