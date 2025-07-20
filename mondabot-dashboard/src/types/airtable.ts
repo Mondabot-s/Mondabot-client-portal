@@ -35,4 +35,31 @@ export interface AirtableTask {
     'ID': number;
     'Projects'?: string[];
   }
+}
+
+export interface AirtableFile {
+  id: string;
+  fields: {
+    'File Name': string;
+    'Category': string;
+    'Uploader': string;
+    'Client Name'?: string;
+    'File URL': string;
+    'File Size': string;
+    'Cloudinary ID': string;
+    'Created': string;
+  }
+}
+
+export interface FileItem {
+  id: string;
+  name: string;
+  category: string;
+  uploader: string;
+  clientName?: string;
+  uploadDate: string;
+  size: string;
+  downloadUrl: string;
+  cloudinaryId?: string;
+  fileType: 'pdf' | 'word' | 'excel' | 'image' | 'other';
 } 

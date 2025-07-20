@@ -1,9 +1,19 @@
-"use client";
-
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useSocket } from './useSocket';
-import { Project } from '@/types/airtable';
+
+interface Project {
+  id: string;
+  projectId?: string;
+  name: string;
+  status: string;
+  deadline?: string | null;
+  assignedManager?: string[];
+  tasks?: string[];
+  clientName?: string;
+  // Add any other fields that might come from Airtable
+  [key: string]: unknown;
+}
 
 interface UseProjectsReturn {
   projects: Project[];
@@ -11,80 +21,84 @@ interface UseProjectsReturn {
   error: string | null;
   refetch: () => Promise<void>;
   socketConnected: boolean;
+  socketError: string | null;
 }
 
-export const useProjects = (): UseProjectsReturn => {
+export const useProjects = (clientName?: string, sortBy?: string): UseProjectsReturn => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
-  const { socket, connected: socketConnected } = useSocket();
+
+  // Initialize Socket.IO connection
+  const { socket, connected: socketConnected, error: socketError } = useSocket();
 
   const fetchProjects = async () => {
     try {
       setLoading(true);
       setError(null);
-      console.log('Fetching projects from API...');
       
-      const response = await axios.get<Project[]>('/api/projects');
-      console.log('Projects fetched successfully:', response.data);
+      // Build query parameters
+      const params = new URLSearchParams();
+      if (clientName) {
+        params.append('clientName', clientName);
+      }
+      if (sortBy) {
+        params.append('sortBy', sortBy);
+      }
       
+      const url = `/api/projects${params.toString() ? `?${params.toString()}` : ''}`;
+      
+      const response = await axios.get(url);
       setProjects(response.data);
     } catch (err: unknown) {
       console.error('Error fetching projects:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch projects';
+      const apiError = axios.isAxiosError(err) ? err.response?.data?.message : null;
+      setError(apiError || errorMessage);
       
-      let errorMessage = 'Failed to fetch projects';
-      
-      if (axios.isAxiosError(err)) {
-        if (err.response) {
-          // Server responded with error
-          const responseData = err.response.data;
-          errorMessage = responseData?.message || `Request failed with status code ${err.response.status}`;
-          
-          if (err.response.status === 503) {
-            errorMessage = responseData?.message || 'Backend server is not running. Please start the Express server on port 3001.';
-            if (responseData?.instructions) {
-              errorMessage += `\n\nInstructions: ${responseData.instructions}`;
-            }
-          } else if (err.response.status === 500) {
-            errorMessage = responseData?.message || 'Internal server error occurred.';
-          }
-        } else if (err.request) {
-          // Request made but no response
-          errorMessage = 'No response from server. Please check your connection and ensure the Next.js server is running.';
-        } else {
-          // Other axios errors
-          errorMessage = err.message;
-        }
-      } else if (err instanceof Error) {
-        errorMessage = err.message;
-      }
-      
-      setError(errorMessage);
+      // Fallback to empty array if API fails
+      setProjects([]);
     } finally {
       setLoading(false);
     }
   };
 
+  // Listen for real-time project updates via Socket.IO
   useEffect(() => {
-    fetchProjects();
-  }, []);
-
-  useEffect(() => {
-    if (socket && socketConnected) {
-      const handleProjectUpdate = (data: unknown) => {
-        console.log('Received project update via WebSocket:', data);
-        // Refetch projects when update is received
-        fetchProjects();
+    if (socket) {
+      const handleProjectUpdate = (updatedProject: Project) => {
+        console.log('Received real-time project update:', updatedProject);
+        setProjects(currentProjects => {
+          // Only include projects that match the client filter
+          if (clientName && updatedProject.clientName !== clientName) {
+            return currentProjects;
+          }
+          
+          const existingProjectIndex = currentProjects.findIndex(project => project.id === updatedProject.id);
+          if (existingProjectIndex >= 0) {
+            // Update existing project
+            const newProjects = [...currentProjects];
+            newProjects[existingProjectIndex] = { ...newProjects[existingProjectIndex], ...updatedProject };
+            return newProjects;
+          } else {
+            // Add new project
+            return [...currentProjects, updatedProject];
+          }
+        });
       };
 
       socket.on('projects_updated', handleProjectUpdate);
 
+      // Cleanup listener on unmount or socket change
       return () => {
         socket.off('projects_updated', handleProjectUpdate);
       };
     }
-  }, [socket, socketConnected]);
+  }, [socket, clientName]);
+
+  useEffect(() => {
+    fetchProjects();
+  }, [clientName, sortBy]);
 
   return {
     projects,
@@ -92,5 +106,6 @@ export const useProjects = (): UseProjectsReturn => {
     error,
     refetch: fetchProjects,
     socketConnected,
+    socketError,
   };
-}; 
+};

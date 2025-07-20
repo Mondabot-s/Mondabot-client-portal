@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mondabot - Tasks</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .kanban-column {
+            min-width: 300px;
+            width: 300px;
+        }
+
+        /* Custom scrollbar for Kanban board */
+        .kanban-container::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .kanban-container::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+
+        .kanban-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .kanban-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800">
+    <main class="flex-1 flex flex-col h-screen">
+        <div class="p-6 pb-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Task Management</h2>
+                    <p class="text-sm text-gray-500">Track your automation progress from concept to completion.</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button
+                        class="bg-pink-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-pink-700 transition-colors flex items-center">
+                        <i class="fas fa-plus mr-2"></i> Create New Task
+                    </button>
+                </div>
+            </div>
+            <div class="mt-4 border-b border-gray-200">
+                <nav class="flex space-x-6 -mb-px">
+                    <a href="#" class="py-3 px-1 border-b-2 border-pink-600 text-pink-600 font-semibold">All Tasks</a>
+                    <a href="#"
+                        class="py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">My
+                        Tasks</a>
+                    <a href="#"
+                        class="py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Due
+                        This Week</a>
+                </nav>
+            </div>
+        </div>
+
+        <div class="flex-1 px-6 pb-6 overflow-x-auto kanban-container">
+            <div class="flex space-x-6">
+
+                <div class="kanban-column bg-white rounded-xl shadow-sm border border-gray-200">
+                    <div class="p-4 border-b border-gray-200">
+                        <h3 class="font-semibold text-gray-700">To Do <span
+                                class="text-sm text-gray-400 font-normal ml-1">3</span></h3>
+                    </div>
+                    <div class="p-4 space-y-4">
+                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 cursor-grab">
+                            <div class="flex justify-between items-start">
+                                <span class="text-xs font-medium bg-blue-100 text-blue-800 px-2 py-1 rounded-full">Asana
+                                    Notetaker</span>
+                                <button class="text-gray-400 hover:text-gray-600"><i
+                                        class="fas fa-ellipsis-h"></i></button>
+                            </div>
+                            <p class="font-semibold text-gray-800 mt-2">Define core functionalities</p>
+                            <p class="text-sm text-gray-500 mt-1">Outline all the features for the initial MVP release.
+                            </p>
+                            <div class="flex items-center justify-between mt-4">
+                                <div class="flex items-center">
+                                    <img src="https://placehold.co/24x24/E9D5FF/805AD5?text=DF"
+                                        class="w-6 h-6 rounded-full border-2 border-white -ml-1" alt="Dave Fajardo">
+                                </div>
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <i class="far fa-calendar-alt mr-1.5"></i>
+                                    <span>Jun 30</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 cursor-grab">
+                            <div class="flex justify-between items-start">
+                                <span
+                                    class="text-xs font-medium bg-purple-100 text-purple-800 px-2 py-1 rounded-full">WhatsApp
+                                    Bot</span>
+                                <button class="text-gray-400 hover:text-gray-600"><i
+                                        class="fas fa-ellipsis-h"></i></button>
+                            </div>
+                            <p class="font-semibold text-gray-800 mt-2">Design conversation flow</p>
+                            <p class="text-sm text-gray-500 mt-1">Map out the user journey and bot responses.</p>
+                            <div class="flex items-center justify-between mt-4">
+                                <div class="flex items-center">
+                                    <img src="https://placehold.co/24x24/E9D5FF/805AD5?text=DF"
+                                        class="w-6 h-6 rounded-full border-2 border-white -ml-1" alt="Dave Fajardo">
+                                    <img src="https://placehold.co/24x24/FED7D7/C53030?text=LR"
+                                        class="w-6 h-6 rounded-full border-2 border-white -ml-2" alt="Lorenzo Ruiz">
+                                </div>
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <i class="far fa-calendar-alt mr-1.5"></i>
+                                    <span>Jul 25</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 cursor-grab">
+                            <div class="flex justify-between items-start">
+                                <span
+                                    class="text-xs font-medium bg-green-100 text-green-800 px-2 py-1 rounded-full">Twitter
+                                    Bot</span>
+                                <button class="text-gray-400 hover:text-gray-600"><i
+                                        class="fas fa-ellipsis-h"></i></button>
+                            </div>
+                            <p class="font-semibold text-gray-800 mt-2">API Integration Setup</p>
+                            <p class="text-sm text-gray-500 mt-1">Connect to Twitter API and handle authentication.</p>
+                            <div class="flex items-center justify-between mt-4">
+                                <div class="flex items-center">
+                                    <img src="https://placehold.co/24x24/FED7D7/C53030?text=LR"
+                                        class="w-6 h-6 rounded-full border-2 border-white -ml-1" alt="Lorenzo Ruiz">
+                                </div>
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <i class="far fa-calendar-alt mr-1.5"></i>
+                                    <span>Jul 5</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="kanban-column bg-white rounded-xl shadow-sm border border-gray-200">
+                    <div class="p-4 border-b border-gray-200">
+                        <h3 class="font-semibold text-gray-700">In Progress <span
+                                class="text-sm text-gray-400 font-normal ml-1">3</span></h3>
+                    </div>
+                    <div class="p-4 space-y-4">
+                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 cursor-grab">
+                            <div class="flex justify-between items-start">
+                                <span
+                                    class="text-xs font-medium bg-pink-100 text-pink-800 px-2 py-1 rounded-full">LinkedIn
+                                    Automation</span>
+                                <button class="text-gray-400 hover:text-gray-600"><i
+                                        class="fas fa-ellipsis-h"></i></button>
+                            </div>
+                            <p class="font-semibold text-gray-800 mt-2">Develop scraping module</p>
+                            <p class="text-sm text-gray-500 mt-1">Building the core logic for data extraction.</p>
+                            <div class="flex items-center justify-between mt-4">
+                                <div class="flex items-center">
+                                    <img src="https://placehold.co/24x24/FED7D7/C53030?text=LR"
+                                        class="w-6 h-6 rounded-full border-2 border-white -ml-1" alt="Lorenzo Ruiz">
+                                </div>
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <i class="far fa-calendar-alt mr-1.5"></i>
+                                    <span>Jul 31</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 cursor-grab">
+                            <div class="flex justify-between items-start">
+                                <span class="text-xs font-medium bg-blue-100 text-blue-800 px-2 py-1 rounded-full">Asana
+                                    Notetaker</span>
+                                <button class="text-gray-400 hover:text-gray-600"><i
+                                        class="fas fa-ellipsis-h"></i></button>
+                            </div>
+                            <p class="font-semibold text-gray-800 mt-2">Build user interface</p>
+                            <p class="text-sm text-gray-500 mt-1">Creating the front-end components for the app.</p>
+                            <div class="flex items-center justify-between mt-4">
+                                <div class="flex items-center">
+                                    <img src="https://placehold.co/24x24/E9D5FF/805AD5?text=DF"
+                                        class="w-6 h-6 rounded-full border-2 border-white -ml-1" alt="Dave Fajardo">
+                                </div>
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <i class="far fa-calendar-alt mr-1.5"></i>
+                                    <span>Jun 30</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 cursor-grab">
+                            <div class="flex justify-between items-start">
+                                <span
+                                    class="text-xs font-medium bg-green-100 text-green-800 px-2 py-1 rounded-full">Twitter
+                                    Bot</span>
+                                <button class="text-gray-400 hover:text-gray-600"><i
+                                        class="fas fa-ellipsis-h"></i></button>
+                            </div>
+                            <p class="font-semibold text-gray-800 mt-2">Initial feature testing</p>
+                            <p class="text-sm text-gray-500 mt-1">Ready for QA and client feedback.</p>
+                            <div class="flex items-center justify-between mt-4">
+                                <div class="flex items-center">
+                                    <img src="https://placehold.co/24x24/FED7D7/C53030?text=LR"
+                                        class="w-6 h-6 rounded-full border-2 border-white -ml-1" alt="Lorenzo Ruiz">
+                                </div>
+                                <div class="flex items-center text-sm text-orange-500 font-medium">
+                                    <i class="far fa-clock mr-1.5"></i>
+                                    <span>Due Today</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="kanban-column bg-white rounded-xl shadow-sm border border-gray-200">
+                    <div class="p-4 border-b border-gray-200">
+                        <h3 class="font-semibold text-gray-700">Done <span
+                                class="text-sm text-gray-400 font-normal ml-1">1</span></h3>
+                    </div>
+                    <div class="p-4 space-y-4">
+                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 cursor-grab opacity-70">
+                            <div class="flex justify-between items-start">
+                                <span class="text-xs font-medium bg-gray-200 text-gray-600 px-2 py-1 rounded-full">BNI
+                                    Coach Bot</span>
+                                <button class="text-gray-400 hover:text-gray-600"><i
+                                        class="fas fa-ellipsis-h"></i></button>
+                            </div>
+                            <p class="font-semibold text-gray-600 mt-2 line-through">Launch bot to production</p>
+                            <p class="text-sm text-gray-500 mt-1">Successfully deployed and live.</p>
+                            <div class="flex items-center justify-between mt-4">
+                                <div class="flex items-center">
+                                    <img src="https://placehold.co/24x24/E9D5FF/805AD5?text=DF"
+                                        class="w-6 h-6 rounded-full border-2 border-white -ml-1" alt="Dave Fajardo">
+                                    <img src="https://placehold.co/24x24/BEE3F8/2B6CB0?text=SB"
+                                        class="w-6 h-6 rounded-full border-2 border-white -ml-2" alt="Sergio Bernal">
+                                    <img src="https://placehold.co/24x24/FED7D7/C53030?text=LR"
+                                        class="w-6 h-6 rounded-full border-2 border-white -ml-2" alt="Lorenzo Ruiz">
+                                </div>
+                                <div class="flex items-center text-sm text-green-600 font-medium">
+                                    <i class="fas fa-check-circle mr-1.5"></i>
+                                    <span>Jun 30</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+    <script>
+        // A simple script to make the kanban board draggable could be added here.
+        // For a mockup, this is primarily for visual representation.
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mondabot Client Portal - Projects</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        xintegrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f8fa;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.07);
+        }
+
+        /* Filter Tab Styles */
+        .filter-tab-active {
+            background-color: #1e293b;
+            /* slate-800 */
+            color: white;
+        }
+
+        .filter-tab-inactive {
+            background-color: white;
+            color: #475569;
+            /* slate-600 */
+        }
+
+        .filter-tab-inactive:hover {
+            background-color: #f8fafc;
+            /* slate-50 */
+        }
+    </style>
+</head>
+
+<body class="text-slate-800">
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="p-8">
+
+        <!-- ===== PROJECTS VIEW (MERGED DESIGN) ===== -->
+        <section id="projects">
+            <h1 class="text-3xl font-bold text-slate-900">Your Projects</h1>
+            <p class="text-slate-500 mt-1">Filter and view all your active and completed automations.</p>
+
+            <!-- NEW: Filter Bar -->
+            <div
+                class="mt-6 bg-white p-2 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <nav id="project-filter-nav" class="flex space-x-2">
+                    <button data-filter="all"
+                        class="filter-tab-active font-semibold px-4 py-2 rounded-lg text-sm flex items-center">All
+                        Projects <span
+                            class="ml-2 bg-slate-600 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">4</span></button>
+                    <button data-filter="feedback"
+                        class="filter-tab-inactive font-medium px-4 py-2 rounded-lg text-sm flex items-center">Awaiting
+                        Feedback <span
+                            class="ml-2 bg-yellow-200 text-yellow-800 text-xs w-5 h-5 flex items-center justify-center rounded-full">1</span></button>
+                    <button data-filter="progress"
+                        class="filter-tab-inactive font-medium px-4 py-2 rounded-lg text-sm flex items-center">In
+                        Progress <span
+                            class="ml-2 bg-blue-200 text-blue-800 text-xs w-5 h-5 flex items-center justify-center rounded-full">1</span></button>
+                    <button data-filter="live"
+                        class="filter-tab-inactive font-medium px-4 py-2 rounded-lg text-sm flex items-center">Live
+                        <span
+                            class="ml-2 bg-green-200 text-green-800 text-xs w-5 h-5 flex items-center justify-center rounded-full">1</span></button>
+                    <button data-filter="completed"
+                        class="filter-tab-inactive font-medium px-4 py-2 rounded-lg text-sm flex items-center">Completed
+                        <span
+                            class="ml-2 bg-slate-200 text-slate-700 text-xs w-5 h-5 flex items-center justify-center rounded-full">1</span></button>
+                </nav>
+                <button
+                    class="text-slate-500 font-medium px-4 py-2 rounded-lg text-sm flex items-center border border-slate-300 bg-white hover:bg-slate-50">Sort
+                    by: Most Recent <i class="fas fa-chevron-down ml-2 text-xs"></i></button>
+            </div>
+
+            <div id="project-card-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <!-- Project Card 1 -->
+                <div class="project-card bg-white p-6 rounded-xl border border-slate-200 shadow-sm"
+                    data-status="feedback">
+                    <div class="flex justify-between items-start">
+                        <h3 class="font-bold text-lg text-slate-800">Twitter Bot</h3><span
+                            class="text-xs font-semibold bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full">Awaiting
+                            Feedback</span>
+                    </div>
+                    <p class="text-sm text-slate-500 mt-2">This automation is ready for your review before we move to
+                        the final deployment phase.</p>
+                    <div class="mt-4"><span class="text-sm font-medium text-slate-600">Overall Progress</span>
+                        <div class="w-full bg-slate-200 rounded-full h-2.5 mt-1">
+                            <div class="bg-yellow-500 h-2.5 rounded-full" style="width: 75%"></div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-end mt-4 border-t border-slate-200 pt-4">
+                        <div>
+                            <p class="text-xs text-slate-500">Next Milestone</p>
+                            <p class="font-semibold text-slate-700">Final Deployment</p>
+                        </div><button
+                            class="view-details-btn bg-slate-800 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-slate-900">View
+                            Details</button>
+                    </div>
+                </div>
+                <!-- Project Card 2 -->
+                <div class="project-card bg-white p-6 rounded-xl border border-slate-200 shadow-sm"
+                    data-status="progress">
+                    <div class="flex justify-between items-start">
+                        <h3 class="font-bold text-lg text-slate-800">Asana Notetaker</h3><span
+                            class="text-xs font-semibold bg-blue-100 text-blue-800 px-3 py-1 rounded-full">In
+                            Progress</span>
+                    </div>
+                    <p class="text-sm text-slate-500 mt-2">Our team is actively developing the core features for this
+                        automation.</p>
+                    <div class="mt-4"><span class="text-sm font-medium text-slate-600">Overall Progress</span>
+                        <div class="w-full bg-slate-200 rounded-full h-2.5 mt-1">
+                            <div class="bg-blue-500 h-2.5 rounded-full" style="width: 40%"></div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-end mt-4 border-t border-slate-200 pt-4">
+                        <div>
+                            <p class="text-xs text-slate-500">Next Milestone</p>
+                            <p class="font-semibold text-slate-700">Feature-Complete Demo</p>
+                        </div><button
+                            class="view-details-btn bg-slate-800 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-slate-900">View
+                            Details</button>
+                    </div>
+                </div>
+                <!-- Project Card 3 -->
+                <div class="project-card bg-white p-6 rounded-xl border border-slate-200 shadow-sm" data-status="live">
+                    <div class="flex justify-between items-start">
+                        <h3 class="font-bold text-lg text-slate-800">Scraping Leads from LinkedIn</h3><span
+                            class="text-xs font-semibold bg-green-100 text-green-800 px-3 py-1 rounded-full">Live</span>
+                    </div>
+                    <p class="text-sm text-slate-500 mt-2">This automation is live and actively working for you.</p>
+                    <div class="mt-4"><span class="text-sm font-medium text-slate-600">Overall Progress</span>
+                        <div class="w-full bg-slate-200 rounded-full h-2.5 mt-1">
+                            <div class="bg-green-500 h-2.5 rounded-full" style="width: 100%"></div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-end mt-4 border-t border-slate-200 pt-4">
+                        <div>
+                            <p class="text-xs text-slate-500">Status</p>
+                            <p class="font-semibold text-green-600">Operational</p>
+                        </div><button
+                            class="view-details-btn bg-slate-800 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-slate-900">View
+                            Performance</button>
+                    </div>
+                </div>
+                <!-- Project Card 4 -->
+                <div class="project-card bg-white p-6 rounded-xl border border-slate-200 shadow-sm"
+                    data-status="completed">
+                    <div class="flex justify-between items-start">
+                        <h3 class="font-bold text-lg text-slate-800">BNI Coach Bot</h3><span
+                            class="text-xs font-semibold bg-slate-200 text-slate-700 px-3 py-1 rounded-full">Completed</span>
+                    </div>
+                    <p class="text-sm text-slate-500 mt-2">This project was successfully completed and delivered.</p>
+                    <div class="mt-4"><span class="text-sm font-medium text-slate-600">Overall Progress</span>
+                        <div class="w-full bg-slate-200 rounded-full h-2.5 mt-1">
+                            <div class="bg-green-500 h-2.5 rounded-full" style="width: 100%"></div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-end mt-4 border-t border-slate-200 pt-4">
+                        <div>
+                            <p class="text-xs text-slate-500">Completed On</p>
+                            <p class="font-semibold text-slate-700">June 15, 2025</p>
+                        </div><button
+                            class="view-details-btn bg-slate-800 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-slate-900">View
+                            Summary</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const filterButtons = document.querySelectorAll('#project-filter-nav button');
+            const projectCards = document.querySelectorAll('.project-card');
+
+            filterButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const filter = e.currentTarget.dataset.filter;
+
+                    // Update button styles
+                    filterButtons.forEach(btn => {
+                        btn.classList.remove('filter-tab-active');
+                        btn.classList.add('filter-tab-inactive');
+                    });
+                    e.currentTarget.classList.add('filter-tab-active');
+                    e.currentTarget.classList.remove('filter-tab-inactive');
+
+                    // Filter project cards
+                    projectCards.forEach(card => {
+                        if (filter === 'all' || card.dataset.status === filter) {
+                            card.style.display = 'block';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                });
+            });
+
+            // Note: The 'View Details' and other navigation buttons will not navigate
+            // in this standalone version as their target sections are not included.
+        });
+    </script>
+</body>
+
+</html>

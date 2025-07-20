@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { Bell, Plus, MessageCircle, AlertCircle, Zap, CheckCircle, Clock, Database, Mail } from 'lucide-react';
+// import { useProjects } from '../hooks/useProjects';
+import { Bell, MessageCircle, Clock, Mail } from 'lucide-react';
 import Image from 'next/image';
 
 // Check if authentication is enabled (using NEXT_PUBLIC_ prefix)
@@ -12,16 +14,8 @@ const UserSpecificContent = () => {
     // Check if authentication is enabled and Clerk is configured
     const isClerkConfigured = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
     
-    // Always call useUser hook to comply with React hooks rules
-    let userResult;
-    try {
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        userResult = useUser();
-    } catch (error) {
-        // If Clerk hooks fail (e.g., during build), use default values
-        console.warn('Clerk hooks not available:', error);
-        userResult = { user: null, isLoaded: true };
-    }
+    // Always call useUser hook at the top level to comply with React hooks rules
+    const userResult = useUser();
     
     // Only use results if authentication is enabled and Clerk is configured
     const user = (isAuthEnabled && isClerkConfigured) ? userResult.user : null;
@@ -53,68 +47,80 @@ const UserSpecificContent = () => {
 
 // The main page content, now receiving user name as a prop
 const HomePageContent = ({ userName }: { userName: string }) => {
+    const [showNotifications, setShowNotifications] = useState(false);
+    
+    // Use the projects hook with client filtering (data not used in this component)
+    // const { projects, loading: projectsLoading } = useProjects(userName);
+
     return (
         <>
             {/* Header */}
             <header className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between mb-4">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">Welcome, {userName}</h1>
-                    <p className="text-gray-600 mt-1">Here&apos;s your automation empire at a glance.</p>
                 </div>
-                <div className="flex items-center space-x-4 mt-4 sm:mt-0">
-                    <button className="p-2 rounded-lg hover:bg-gray-100 transition">
-                        <Bell className="w-5 h-5 text-gray-600" />
-                    </button>
-                    <button className="flex items-center space-x-2 px-4 py-2 rounded-lg text-white font-semibold bg-[#6A10AD] hover:bg-[#7d1fc4] transition">
-                        <Plus className="w-5 h-5" />
-                        <span>Create New</span>
-                    </button>
+                <div className="flex items-center justify-end mt-4 sm:mt-0">
+                    <div className="relative">
+                        <button 
+                            onClick={() => setShowNotifications(!showNotifications)}
+                            className="p-3 rounded-xl hover:bg-gray-100 transition-all duration-200 relative shadow-sm border border-gray-200 bg-white"
+                        >
+                            <Bell className="w-6 h-6 text-gray-600" />
+                            <span className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center shadow-lg border-2 border-white">
+                                <span className="text-xs text-white font-bold">3</span>
+                            </span>
+                        </button>
+                        
+                        {/* Notification Dropdown */}
+                        {showNotifications && (
+                            <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                                <div className="p-4 border-b border-gray-100">
+                                    <h3 className="font-semibold text-gray-900">Notifications</h3>
+                                </div>
+                                <div className="max-h-96 overflow-y-auto">
+                                    <div className="p-3 hover:bg-gray-50 border-b border-gray-100">
+                                        <div className="flex items-start space-x-3">
+                                            <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                                            <div className="flex-1">
+                                                <p className="text-sm font-medium text-gray-900">WhatsApp Bot Review Required</p>
+                                                <p className="text-xs text-gray-500 mt-1">Your approval is needed for the conversation flow updates</p>
+                                                <p className="text-xs text-gray-400 mt-1">2 hours ago</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="p-3 hover:bg-gray-50 border-b border-gray-100">
+                                        <div className="flex items-start space-x-3">
+                                            <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                                            <div className="flex-1">
+                                                <p className="text-sm font-medium text-gray-900">LinkedIn Campaign Completed</p>
+                                                <p className="text-xs text-gray-500 mt-1">Generated 23 new leads this week</p>
+                                                <p className="text-xs text-gray-400 mt-1">5 hours ago</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="p-3 hover:bg-gray-50">
+                                        <div className="flex items-start space-x-3">
+                                            <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
+                                            <div className="flex-1">
+                                                <p className="text-sm font-medium text-gray-900">System Maintenance Scheduled</p>
+                                                <p className="text-xs text-gray-500 mt-1">Brief maintenance window planned for tomorrow 2-3 AM</p>
+                                                <p className="text-xs text-gray-400 mt-1">1 day ago</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="p-3 border-t border-gray-100">
+                                    <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                                        View all notifications
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </header>
 
-            {/* Metrics Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-                <div className="bg-white p-5 rounded-xl border border-gray-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                    <div className="flex items-center justify-between mb-3">
-                        <p className="text-sm text-gray-600">Active Automations</p>
-                        <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                            <Zap className="w-6 h-6 text-purple-600" />
-                        </div>
-                    </div>
-                    <p className="text-3xl font-bold text-gray-900">12</p>
-                    <p className="text-sm text-green-600 mt-2">↑ +33.3% from last month</p>
-                </div>
-                <div className="bg-white p-5 rounded-xl border border-gray-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                    <div className="flex items-center justify-between mb-3">
-                        <p className="text-sm text-gray-600">Tasks Completed</p>
-                        <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                            <CheckCircle className="w-6 h-6 text-green-600" />
-                        </div>
-                    </div>
-                    <p className="text-3xl font-bold text-gray-900">156</p>
-                    <p className="text-sm text-green-600 mt-2">↑ +12% this week</p>
-                </div>
-                <div className="bg-white p-5 rounded-xl border border-gray-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                    <div className="flex items-center justify-between mb-3">
-                        <p className="text-sm text-gray-600">Time Saved</p>
-                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <Clock className="w-6 h-6 text-blue-600" />
-                        </div>
-                    </div>
-                    <p className="text-3xl font-bold text-gray-900">48h</p>
-                    <p className="text-sm text-gray-500 mt-2">This month</p>
-                </div>
-                <div className="bg-white p-5 rounded-xl border border-gray-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                    <div className="flex items-center justify-between mb-3">
-                        <p className="text-sm text-gray-600">Active Integrations</p>
-                        <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                            <Database className="w-6 h-6 text-orange-600" />
-                        </div>
-                    </div>
-                    <p className="text-3xl font-bold text-gray-900">8</p>
-                    <p className="text-sm text-gray-500 mt-2">All systems operational</p>
-                </div>
-            </div>
+            {/* Metrics Grid removed */}
 
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -137,47 +143,11 @@ const HomePageContent = ({ userName }: { userName: string }) => {
                         </div>
                     </div>
 
-                    {/* Action Required */}
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-5">
-                        <div className="flex items-start space-x-3">
-                            <AlertCircle className="w-6 h-6 text-yellow-600 mt-0.5 flex-shrink-0" />
-                            <div className="flex-1">
-                                <h3 className="font-bold text-gray-900">Action Required: WhatsApp Bot Review</h3>
-                                <p className="text-sm text-gray-700 mt-1">Your feedback on conversation flows is needed before launch. This will only take 5 minutes.</p>
-                                <button className="mt-3 px-4 py-2 bg-yellow-600 text-white text-sm font-semibold rounded-lg hover:bg-yellow-700 transition">
-                                    Review Now →
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    {/* Action Required section removed */}
 
-                    {/* Recent Activity */}
-                    <div className="bg-white rounded-xl border border-gray-100 p-5">
-                        <h3 className="text-lg font-bold text-gray-900 mb-4">Recent Activity</h3>
-                        <div className="space-y-3">
-                            <div className="flex items-start space-x-3">
-                                <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5 flex-shrink-0"></div>
-                                <div>
-                                    <p className="text-sm font-medium text-gray-900">Lead Generation Automation Activated</p>
-                                    <p className="text-xs text-gray-500">2 hours ago • LinkedIn Integration</p>
-                                </div>
-                            </div>
-                            <div className="flex items-start space-x-3">
-                                <div className="w-2 h-2 bg-orange-500 rounded-full mt-1.5 flex-shrink-0"></div>
-                                <div>
-                                    <p className="text-sm font-medium text-gray-900">Email Campaign Performance Report Ready</p>
-                                    <p className="text-xs text-gray-500">5 hours ago • 34% Open Rate</p>
-                                </div>
-                            </div>
-                            <div className="flex items-start space-x-3">
-                                <div className="w-2 h-2 bg-purple-500 rounded-full mt-1.5 flex-shrink-0"></div>
-                                <div>
-                                    <p className="text-sm font-medium text-gray-900">New Integration: Slack Connected</p>
-                                    <p className="text-xs text-gray-500">Yesterday • Team Notifications Enabled</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    {/* Your Projects section removed */}
+
+                    {/* Recent Activity section removed */}
                 </div>
 
                 {/* Right Column */}
@@ -215,14 +185,14 @@ const HomePageContent = ({ userName }: { userName: string }) => {
                             href="https://calendly.com/mondabot/30min?month=2025-07"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="w-full py-2.5 rounded-lg text-white font-semibold bg-[#6A10AD] hover:bg-[#7d1fc4] transition flex items-center justify-center"
+                            className="w-full py-2.5 rounded-lg text-white font-semibold bg-[#CC1175] hover:bg-[#d92085] transition flex items-center justify-center"
                         >
                             Schedule Strategy Call
                         </a>
                     </div>
 
                     {/* Next Major Milestone */}
-                    <div className="bg-[#6A10AD] text-white rounded-xl p-5">
+                    <div className="bg-[#CC1175] text-white rounded-xl p-5">
                         <h3 className="font-bold text-lg mb-4">Next Major Milestone</h3>
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center space-x-3">

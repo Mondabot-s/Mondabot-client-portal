@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useTasks } from '../../hooks/useTasks';
+import { useProjects } from '../../hooks/useProjects';
 import { useUser } from '@clerk/nextjs';
 
 // Overview Section
@@ -26,7 +27,7 @@ const OverviewSection = () => {
   // Check if authentication is enabled and Clerk is configured
   const isAuthEnabled = process.env.NEXT_PUBLIC_ENABLE_AUTHENTICATION === 'true';
   const isClerkConfigured = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-  
+
   // Always call useUser hook to comply with React hooks rules
   let userResult;
   try {
@@ -37,13 +38,13 @@ const OverviewSection = () => {
     console.warn('Clerk hooks not available:', error);
     userResult = { user: null, isLoaded: true };
   }
-  
+
   // Only use results if authentication is enabled and Clerk is configured
   const user = (isAuthEnabled && isClerkConfigured) ? userResult.user : null;
-  
+
   // Get the user's first name, or default to 'Matthew'
   const firstName = (user?.firstName) || 'Matthew';
-  
+
   return (
     <section id="overview" className="mb-16">
       {/* Welcome Message at Top */}
@@ -58,26 +59,26 @@ const OverviewSection = () => {
         <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto">
           <div className="relative flex-grow sm:flex-grow-0">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400">
-              <circle cx="11" cy="11" r="8"/>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
-            <input 
-              type="text" 
-              placeholder="Search..." 
+            <input
+              type="text"
+              placeholder="Search..."
               className="pl-10 pr-4 py-2 rounded-lg border w-full sm:w-64 focus:ring-2 focus:ring-[#d90077] focus:border-[#d90077] outline-none transition border-gray-300"
             />
           </div>
           <button className="p-2 rounded-lg hover:bg-gray-100 transition relative">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-gray-600">
-              <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
-              <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+              <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+              <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
             </svg>
             <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse border-2 border-white"></span>
           </button>
           <button className="flex items-center space-x-2 px-4 py-2 rounded-lg text-white font-semibold transition bg-[#d90077] hover:bg-[#b80062]">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-              <line x1="12" y1="5" x2="12" y2="19"/>
-              <line x1="5" y1="12" x2="19" y2="12"/>
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
             <span className="hidden sm:inline">New Task</span>
           </button>
@@ -96,7 +97,7 @@ const OverviewSection = () => {
             </div>
             <div className="p-3 rounded-full bg-purple-100">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-purple-600">
-                <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>
+                <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" />
               </svg>
             </div>
           </div>
@@ -112,8 +113,8 @@ const OverviewSection = () => {
             </div>
             <div className="p-3 rounded-full bg-green-100">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-green-600">
-                <polyline points="9 11 12 14 22 4"/>
-                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                <polyline points="9 11 12 14 22 4" />
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
               </svg>
             </div>
           </div>
@@ -129,8 +130,8 @@ const OverviewSection = () => {
             </div>
             <div className="p-3 rounded-full bg-blue-100">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-blue-600">
-                <circle cx="12" cy="12" r="10"/>
-                <polyline points="12 6 12 12 16 14"/>
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
               </svg>
             </div>
           </div>
@@ -146,13 +147,13 @@ const OverviewSection = () => {
             </div>
             <div className="p-3 rounded-full bg-orange-100">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-orange-600">
-                <path d="M9 3L5 7m4 10l4 4"/>
-                <path d="M5 17l4-4"/>
-                <path d="M9 21l4-4"/>
-                <path d="M15 3l4 4"/>
-                <path d="M19 7l-4 4"/>
-                <path d="M15 21l-4-4"/>
-                <path d="M19 17l-4-4"/>
+                <path d="M9 3L5 7m4 10l4 4" />
+                <path d="M5 17l4-4" />
+                <path d="M9 21l4-4" />
+                <path d="M15 3l4 4" />
+                <path d="M19 7l-4 4" />
+                <path d="M15 21l-4-4" />
+                <path d="M19 17l-4-4" />
               </svg>
             </div>
           </div>
@@ -182,7 +183,7 @@ const OverviewSection = () => {
             </p>
           </Card>
         </div>
-        
+
         <div className="space-y-6">
           {/* Your Dedicated Project Lead */}
           <Card>
@@ -191,9 +192,9 @@ const OverviewSection = () => {
             </h2>
             <div className="flex items-center space-x-4 mb-4">
               <div className="relative w-16 h-16 rounded-full overflow-hidden">
-                <Image 
-                  src="/Sergio_Bernal.jpg" 
-                  alt="Sergio Bernal" 
+                <Image
+                  src="/Sergio_Bernal.jpg"
+                  alt="Sergio Bernal"
                   width={64}
                   height={64}
                   className="w-full h-full object-cover"
@@ -213,7 +214,7 @@ const OverviewSection = () => {
             <div className="space-y-2">
               <div className="flex items-center text-sm">
                 <Icon icon={Mail} className="w-5 h-5 mr-3" />
-                <a 
+                <a
                   href="mailto:sergio@mondabot.com"
                   className="text-text-secondary hover:text-primary transition-colors cursor-pointer"
                 >
@@ -235,9 +236,9 @@ const OverviewSection = () => {
             <div className="flex">
               <div className="py-1">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-yellow-500 mr-4">
-                  <path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
-                  <path d="M12 9v4"/>
-                  <path d="M12 17h.01"/>
+                  <path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+                  <path d="M12 9v4" />
+                  <path d="M12 17h.01" />
                 </svg>
               </div>
               <div>
@@ -256,9 +257,9 @@ const OverviewSection = () => {
             <div className="flex items-center space-x-4 mb-4">
               <div className="p-3 rounded-full bg-gray-100">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-gray-600">
-                  <circle cx="12" cy="12" r="10"/>
-                  <circle cx="12" cy="12" r="6"/>
-                  <circle cx="12" cy="12" r="2"/>
+                  <circle cx="12" cy="12" r="10" />
+                  <circle cx="12" cy="12" r="6" />
+                  <circle cx="12" cy="12" r="2" />
                 </svg>
               </div>
               <div>
@@ -541,11 +542,10 @@ const StrategySection = () => {
                 </p>
               </div>
               <span
-                className={`text-xs px-2 py-1 rounded-full font-medium ${
-                  type.status === 'approved' 
-                    ? 'bg-green-100 text-green-700' 
+                className={`text-xs px-2 py-1 rounded-full font-medium ${type.status === 'approved'
+                    ? 'bg-green-100 text-green-700'
                     : 'bg-yellow-100 text-yellow-700'
-                }`}
+                  }`}
               >
                 {type.status === 'approved' ? 'Approved' : 'Pending'}
               </span>
@@ -565,15 +565,189 @@ const StrategySection = () => {
   );
 };
 
+// Projects Section with Client Filtering
+const ProjectsSection = () => {
+  // Check if authentication is enabled and Clerk is configured
+  const isAuthEnabled = process.env.NEXT_PUBLIC_ENABLE_AUTHENTICATION === 'true';
+  const isClerkConfigured = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+
+  // Always call useUser hook to comply with React hooks rules
+  let userResult;
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    userResult = useUser();
+  } catch (error) {
+    // If Clerk hooks fail (e.g., during build), use default values
+    console.warn('Clerk hooks not available:', error);
+    userResult = { user: null, isLoaded: true };
+  }
+
+  // Only use results if authentication is enabled and Clerk is configured
+  const user = (isAuthEnabled && isClerkConfigured) ? userResult.user : null;
+
+  // Get the user's full name for client filtering
+  const clientName = user?.fullName || user?.firstName || 'Demo Client';
+  
+  // Use the projects hook with client filtering
+  const {
+    projects,
+    loading,
+    error,
+    refetch,
+    socketConnected,
+    socketError
+  } = useProjects(clientName);
+
+  const [sortBy, setSortBy] = useState<string>('');
+
+  const getStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'building':
+        return 'bg-pink-100 text-pink-800';
+      case 'testing':
+        return 'bg-blue-100 text-blue-800';
+      case 'review':
+        return 'bg-orange-100 text-orange-800';
+      case 'live':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  return (
+    <section id="projects" className="mb-16">
+      <header className="mb-8">
+        <div className="flex justify-between items-start">
+          <div>
+            <h2 className="text-3xl font-bold text-text-primary">
+              Your Projects
+            </h2>
+            <p className="text-text-secondary mt-1">
+              Projects assigned to {clientName}
+            </p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary"
+            >
+              <option value="">Sort by...</option>
+              <option value="name">Name</option>
+              <option value="status">Status</option>
+              <option value="deadline">Deadline</option>
+            </select>
+            <div className={`flex items-center px-3 py-1 rounded-full text-sm ${socketConnected
+                ? 'bg-green-100 text-green-700'
+                : 'bg-gray-100 text-gray-700'
+              }`}>
+              <div className={`w-2 h-2 rounded-full mr-2 ${socketConnected ? 'bg-green-500' : 'bg-gray-500'
+                }`}></div>
+              {socketConnected ? 'Real-time Connected' : 'Real-time Disconnected'}
+            </div>
+          </div>
+        </div>
+        {socketError && (
+          <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-700">
+            ⚠️ Real-time connection: {socketError}
+          </div>
+        )}
+      </header>
+
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-sm text-red-700">⚠️ {error}</p>
+          <p className="text-xs text-red-600 mt-1">Using fallback data for display</p>
+          <button 
+            onClick={refetch}
+            className="mt-2 px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-white p-6 rounded-xl border border-gray-200 animate-pulse">
+              <div className="h-4 bg-gray-200 rounded mb-4"></div>
+              <div className="h-3 bg-gray-200 rounded mb-2"></div>
+              <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {projects.map((project) => (
+            <Card key={project.id}>
+              <div className="flex justify-between items-start mb-4">
+                <h3 className="text-lg font-semibold text-text-primary">
+                  {project.name}
+                </h3>
+                <span className={`text-xs px-2 py-1 rounded-full font-medium ${getStatusColor(project.status)}`}>
+                  {project.status}
+                </span>
+              </div>
+              
+              {project.deadline && (
+                <div className="flex items-center text-sm text-text-secondary mb-3">
+                  <Icon icon={Calendar} className="w-4 h-4 mr-2" />
+                  <span>Due: {new Date(project.deadline).toLocaleDateString()}</span>
+                </div>
+              )}
+              
+              {project.tasks && project.tasks.length > 0 && (
+                <div className="flex items-center text-sm text-text-secondary mb-3">
+                  <Icon icon={ListChecks} className="w-4 h-4 mr-2" />
+                  <span>{project.tasks.length} tasks</span>
+                </div>
+              )}
+              
+              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                <span className="text-xs text-text-secondary">
+                  Client: {project.clientName || clientName}
+                </span>
+                <button className="text-sm font-medium text-primary hover:underline">
+                  View Details
+                </button>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {!loading && projects.length === 0 && (
+        <div className="text-center py-12">
+          <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+            <Icon icon={Database} className="w-8 h-8 text-gray-400" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No Projects Found</h3>
+          <p className="text-gray-600 mb-4">
+            No projects are currently assigned to {clientName}.
+          </p>
+          <button 
+            onClick={refetch}
+            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
+          >
+            Refresh Projects
+          </button>
+        </div>
+      )}
+    </section>
+  );
+};
+
 // Setup Section
 const SetupSection = () => {
-  const { 
-    tasks: setupTasks, 
-    loading, 
-    error, 
-    updateTaskStatus, 
-    socketConnected, 
-    socketError 
+  const {
+    tasks: setupTasks,
+    loading,
+    error,
+    updateTaskStatus,
+    socketConnected,
+    socketError
   } = useTasks();
 
   const apiConfigs = [
@@ -617,14 +791,12 @@ const SetupSection = () => {
             </p>
           </div>
           <div className="flex items-center space-x-4">
-            <div className={`flex items-center px-3 py-1 rounded-full text-sm ${
-              socketConnected 
-                ? 'bg-green-100 text-green-700' 
+            <div className={`flex items-center px-3 py-1 rounded-full text-sm ${socketConnected
+                ? 'bg-green-100 text-green-700'
                 : 'bg-gray-100 text-gray-700'
-            }`}>
-              <div className={`w-2 h-2 rounded-full mr-2 ${
-                socketConnected ? 'bg-green-500' : 'bg-gray-500'
-              }`}></div>
+              }`}>
+              <div className={`w-2 h-2 rounded-full mr-2 ${socketConnected ? 'bg-green-500' : 'bg-gray-500'
+                }`}></div>
               {socketConnected ? 'Real-time Connected' : 'Real-time Disconnected'}
             </div>
           </div>
@@ -665,13 +837,12 @@ const SetupSection = () => {
                     const nextStatus = statuses[(currentIndex + 1) % statuses.length];
                     handleTaskStatusChange(task.id, nextStatus);
                   }}
-                  className={`w-5 h-5 rounded-full border-2 mt-1 flex-shrink-0 transition-colors ${
-                    task.status === 'completed' 
-                      ? 'bg-primary border-primary' 
+                  className={`w-5 h-5 rounded-full border-2 mt-1 flex-shrink-0 transition-colors ${task.status === 'completed'
+                      ? 'bg-primary border-primary'
                       : task.status === 'in-progress'
-                      ? 'border-primary bg-blue-100'
-                      : 'border-gray-300 hover:border-primary'
-                  }`}
+                        ? 'border-primary bg-blue-100'
+                        : 'border-gray-300 hover:border-primary'
+                    }`}
                 >
                   {task.status === 'completed' && (
                     <span className="text-white text-xs flex items-center justify-center">✓</span>
@@ -680,15 +851,14 @@ const SetupSection = () => {
                 <div className="flex-1">
                   <h4 className="font-medium">{task.title}</h4>
                   <p className="text-sm text-gray-600">{task.description}</p>
-                  <span className={`text-xs px-2 py-1 rounded mt-1 inline-block ${
-                    task.status === 'completed' 
-                      ? 'bg-green-100 text-green-800' 
+                  <span className={`text-xs px-2 py-1 rounded mt-1 inline-block ${task.status === 'completed'
+                      ? 'bg-green-100 text-green-800'
                       : task.status === 'in-progress'
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'bg-gray-100 text-gray-800'
-                  }`}>
-                    {task.status === 'completed' ? 'Completado' : 
-                     task.status === 'in-progress' ? 'En Progreso' : 'Pendiente'}
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
+                    {task.status === 'completed' ? 'Completado' :
+                      task.status === 'in-progress' ? 'En Progreso' : 'Pendiente'}
                   </span>
                 </div>
               </div>
@@ -709,15 +879,14 @@ const SetupSection = () => {
                       <p className="text-sm text-gray-600">{api.description}</p>
                     </div>
                   </div>
-                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                    api.status === 'connected' 
-                      ? 'bg-green-100 text-green-700' 
+                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${api.status === 'connected'
+                      ? 'bg-green-100 text-green-700'
                       : api.status === 'connecting'
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'bg-gray-100 text-gray-700'
-                  }`}>
-                    {api.status === 'connected' ? 'Connected' : 
-                     api.status === 'connecting' ? 'Connecting' : 'Pending'}
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'bg-gray-100 text-gray-700'
+                    }`}>
+                    {api.status === 'connected' ? 'Connected' :
+                      api.status === 'connecting' ? 'Connecting' : 'Pending'}
                   </span>
                 </div>
                 <div className="flex space-x-2">
@@ -763,7 +932,7 @@ const TestingSection = () => {
   const handleRunTest = (testName: string) => {
     setTestScenarios(scenarios =>
       scenarios.map(test =>
-        test.name === testName 
+        test.name === testName
           ? { ...test, status: test.status === 'pending' ? 'in-progress' : test.status }
           : test
       )
@@ -795,19 +964,18 @@ const TestingSection = () => {
                       <p className="text-sm text-gray-600">{test.description}</p>
                     </div>
                   </div>
-                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                    test.status === 'passed' 
-                      ? 'bg-green-100 text-green-700' 
+                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${test.status === 'passed'
+                      ? 'bg-green-100 text-green-700'
                       : test.status === 'in-progress'
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'bg-gray-100 text-gray-700'
-                  }`}>
-                    {test.status === 'passed' ? 'Passed' : 
-                     test.status === 'in-progress' ? 'In Progress' : 'Pending'}
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'bg-gray-100 text-gray-700'
+                    }`}>
+                    {test.status === 'passed' ? 'Passed' :
+                      test.status === 'in-progress' ? 'In Progress' : 'Pending'}
                   </span>
                 </div>
                 <div className="flex space-x-2">
-                  <button 
+                  <button
                     onClick={() => handleRunTest(test.name)}
                     className="text-sm font-medium text-primary hover:underline"
                   >
@@ -897,13 +1065,12 @@ const LaunchSection = () => {
                     const nextStatus = statuses[(currentIndex + 1) % statuses.length];
                     handleLaunchTaskStatusChange(task.id, nextStatus);
                   }}
-                  className={`w-5 h-5 rounded-full border-2 mt-1 flex-shrink-0 transition-colors ${
-                    task.status === 'completed' 
-                      ? 'bg-primary border-primary' 
+                  className={`w-5 h-5 rounded-full border-2 mt-1 flex-shrink-0 transition-colors ${task.status === 'completed'
+                      ? 'bg-primary border-primary'
                       : task.status === 'in-progress'
-                      ? 'border-primary bg-blue-100'
-                      : 'border-gray-300 hover:border-primary'
-                  }`}
+                        ? 'border-primary bg-blue-100'
+                        : 'border-gray-300 hover:border-primary'
+                    }`}
                 >
                   {task.status === 'completed' && (
                     <span className="text-white text-xs flex items-center justify-center">✓</span>
@@ -912,15 +1079,14 @@ const LaunchSection = () => {
                 <div className="flex-1">
                   <h4 className="font-medium">{task.title}</h4>
                   <p className="text-sm text-gray-600">{task.description}</p>
-                  <span className={`text-xs px-2 py-1 rounded mt-1 inline-block ${
-                    task.status === 'completed' 
-                      ? 'bg-green-100 text-green-800' 
+                  <span className={`text-xs px-2 py-1 rounded mt-1 inline-block ${task.status === 'completed'
+                      ? 'bg-green-100 text-green-800'
                       : task.status === 'in-progress'
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'bg-gray-100 text-gray-800'
-                  }`}>
-                    {task.status === 'completed' ? 'Completado' : 
-                     task.status === 'in-progress' ? 'En Progreso' : 'Pendiente'}
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
+                    {task.status === 'completed' ? 'Completado' :
+                      task.status === 'in-progress' ? 'En Progreso' : 'Pendiente'}
                   </span>
                 </div>
               </div>
@@ -1141,6 +1307,7 @@ export default function NewDashboard() {
   return (
     <div className="space-y-0">
       <OverviewSection />
+      <ProjectsSection />
       <DiscoverySection />
       <StrategySection />
       <SetupSection />

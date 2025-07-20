@@ -5,34 +5,34 @@ import Link from 'next/link';
 import { getStatusBadgeClasses } from '../../utils/statusTheme';
 
 interface Project {
-  id: string;
-  projectId: string;
-  name: string;
-  status: string;
-  deadline: string;
-  assignedManager: string[];
-  tasks: string[];
-  updatedAt?: string;
+    id: string;
+    projectId: string;
+    name: string;
+    status: string;
+    deadline: string;
+    assignedManager: string[];
+    tasks: string[];
+    updatedAt?: string;
 }
 
 interface Task {
-  id: string;
-  'Task Name': string;
-  'Status': string;
-  'Projects': string[];
+    id: string;
+    'Task Name': string;
+    'Status': string;
+    'Projects': string[];
 }
 
 interface ProjectProgress {
-  completedTasks: number;
-  totalTasks: number;
-  percentage: number;
+    completedTasks: number;
+    totalTasks: number;
+    percentage: number;
 }
 
 export default function AutomationsPage() {
-    const [projects, setProjects] = useState<Project[]>([]);
-    const [tasks, setTasks] = useState<Task[]>([]);
+    const [projects, setProjects] = useState([] as Project[]);
+    const [tasks, setTasks] = useState([] as Task[]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState(null as string | null);
     const [sortOrder, setSortOrder] = useState('recent');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [activeFilter, setActiveFilter] = useState('All Projects');
@@ -55,7 +55,7 @@ export default function AutomationsPage() {
         try {
             setLoading(true);
             setError(null);
-            
+
             const [projectsResponse, tasksResponse] = await Promise.all([
                 fetch('/api/projects'),
                 fetch('/api/tasks')
@@ -125,7 +125,7 @@ export default function AutomationsPage() {
         const projectTasks = tasks.filter(task => task.Projects && task.Projects.includes(projectId));
         const completedTasks = projectTasks.filter(task => task.Status === 'Done').length;
         const totalTasks = projectTasks.length;
-        
+
         return {
             completedTasks,
             totalTasks,
@@ -136,9 +136,9 @@ export default function AutomationsPage() {
     // Search functionality
     const searchProjects = useCallback((searchTerm: string) => {
         if (!searchTerm) return projects;
-        
+
         const term = searchTerm.toLowerCase();
-        return projects.filter(project => 
+        return projects.filter(project =>
             project.name.toLowerCase().includes(term) ||
             project.assignedManager.some(manager => manager.toLowerCase().includes(term)) ||
             project.status.toLowerCase().includes(term)
@@ -148,21 +148,21 @@ export default function AutomationsPage() {
     // Filter functionality
     const filterProjects = useCallback((projects: Project[], filterType: string) => {
         if (filterType === 'All Projects') return projects;
-        
+
         if (filterType === 'Completed') {
             return projects.filter(project => {
                 const progress = calculateProjectProgress(project.id);
                 return progress.percentage === 100;
             });
         }
-        
+
         return projects.filter(project => project.status === filterType);
     }, [calculateProjectProgress]);
 
     // Sort functionality
     const sortProjects = useCallback((projects: Project[], sortBy: string) => {
         return [...projects].sort((a, b) => {
-            switch(sortBy) {
+            switch (sortBy) {
                 case 'recent':
                     return new Date(b.updatedAt || '').getTime() - new Date(a.updatedAt || '').getTime();
                 case 'deadline':
@@ -198,10 +198,10 @@ export default function AutomationsPage() {
     const formatDeadline = (deadline: string) => {
         if (!deadline) return 'No deadline';
         try {
-            return new Date(deadline).toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric', 
-                year: 'numeric' 
+            return new Date(deadline).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
             });
         } catch {
             return deadline;
@@ -252,7 +252,7 @@ export default function AutomationsPage() {
                         <span className="text-red-800 font-medium">Error loading projects</span>
                     </div>
                     <p className="text-red-600 text-sm mt-1">{error}</p>
-                    <button 
+                    <button
                         onClick={fetchProjectsAndTasks}
                         className="mt-3 bg-red-600 text-white px-4 py-2 rounded-md text-sm hover:bg-red-700 transition-colors"
                     >
@@ -282,7 +282,7 @@ export default function AutomationsPage() {
             {/* Header with Search */}
             <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
                 <h1 className="text-3xl font-bold text-gray-900">Projects Dashboard</h1>
-                
+
                 {/* Search Bar */}
                 <div className="relative max-w-md">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -316,11 +316,10 @@ export default function AutomationsPage() {
                     {filters.map(filter => (
                         <button
                             key={filter}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
-                                activeFilter === filter
-                                    ? 'bg-brand-primary text-white shadow-sm'
-                                    : 'text-gray-600 hover:bg-gray-100'
-                            }`}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${activeFilter === filter
+                                ? 'bg-brand-primary text-white shadow-sm'
+                                : 'text-gray-600 hover:bg-gray-100'
+                                }`}
                             onClick={() => setActiveFilter(filter)}
                         >
                             {filter}
@@ -354,11 +353,10 @@ export default function AutomationsPage() {
                                     <button
                                         key={option.value}
                                         onClick={() => handleSortChange(option.value)}
-                                        className={`block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors duration-150 ${
-                                            sortOrder === option.value
-                                                ? 'font-semibold text-brand-primary bg-brand-primary/5'
-                                                : 'text-gray-700'
-                                        }`}
+                                        className={`block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors duration-150 ${sortOrder === option.value
+                                            ? 'font-semibold text-brand-primary bg-brand-primary/5'
+                                            : 'text-gray-700'
+                                            }`}
                                     >
                                         {option.label}
                                         {sortOrder === option.value && (
@@ -389,15 +387,15 @@ export default function AutomationsPage() {
                 <div className="space-y-3">
                     {filteredAndSortedProjects.map((project) => {
                         const progress = calculateProjectProgress(project.id);
-                        
+
                         return (
-                            <div 
-                                key={project.id} 
+                            <div
+                                key={project.id}
                                 className="project-card bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-200 relative overflow-hidden border border-transparent hover:border-gray-200 cursor-pointer group"
                             >
                                 {/* Left accent border on hover */}
                                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-transparent group-hover:bg-brand-primary transition-colors duration-200"></div>
-                                
+
                                 {/* Project Header */}
                                 <div className="flex justify-between items-start mb-4">
                                     <div className="flex-1">
@@ -419,44 +417,43 @@ export default function AutomationsPage() {
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                     {/* Status Badge */}
-                                    <span className={`status-badge px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider ${
-                                        project.status === 'Building' ? 'bg-pink-100 text-pink-700' :
+                                    <span className={`status-badge px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider ${project.status === 'Building' ? 'bg-pink-100 text-pink-700' :
                                         project.status === 'Testing' ? 'bg-blue-100 text-blue-700' :
-                                        project.status === 'For Review' ? 'bg-orange-100 text-orange-700' :
-                                        project.status === 'Live' ? 'bg-green-100 text-green-700' :
-                                        'bg-gray-100 text-gray-700'
-                                    }`}>
+                                            project.status === 'For Review' ? 'bg-orange-100 text-orange-700' :
+                                                project.status === 'Live' ? 'bg-green-100 text-green-700' :
+                                                    'bg-gray-100 text-gray-700'
+                                        }`}>
                                         {project.status}
                                     </span>
                                 </div>
-                                
+
                                 {/* Project Footer with Progress */}
                                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mt-4 pt-4 border-t border-gray-100 progress-container">
                                     <div className="flex items-center gap-4 text-sm text-gray-600">
                                         <span className="font-medium">
                                             {progress.completedTasks} / {progress.totalTasks} tasks
                                         </span>
-                                        
+
                                         {/* Progress Bar */}
                                         <div className="w-32 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                                            <div 
-                                                className="h-full bg-brand-primary transition-all duration-300 progress-fill" 
+                                            <div
+                                                className="h-full bg-brand-primary transition-all duration-300 progress-fill"
                                                 style={{ width: `${progress.percentage}%` }}
                                             ></div>
                                         </div>
-                                        
+
                                         <span className="font-medium text-brand-primary">
                                             {progress.percentage}% complete
                                         </span>
                                     </div>
-                                    
-                                    <Link 
+
+                                    <Link
                                         href={`/tasks?project=${project.id}`}
                                         className="text-sm font-medium text-gray-700 hover:text-brand-primary transition-colors flex items-center gap-1 group"
                                     >
-                                        View Details 
+                                        View Details
                                         <svg className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                                         </svg>

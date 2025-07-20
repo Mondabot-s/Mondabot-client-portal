@@ -16,20 +16,9 @@ export default function Sidebar() {
   const isAuthEnabled = process.env.NEXT_PUBLIC_ENABLE_AUTHENTICATION === 'true';
   const isClerkConfigured = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
   
-  // Always call Clerk hooks to comply with React hooks rules
-  let userResult;
-  let clerkResult;
-  try {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    userResult = useUser();
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    clerkResult = useClerk();
-  } catch (error) {
-    // If Clerk hooks fail (e.g., during build), use default values
-    console.warn('Clerk hooks not available:', error);
-    userResult = { user: null, isLoaded: true };
-    clerkResult = { signOut: () => {} };
-  }
+  // Always call Clerk hooks at the top level to comply with React hooks rules
+  const userResult = useUser();
+  const clerkResult = useClerk();
   
   // Only use results if authentication is enabled and Clerk is configured
   const user = (isAuthEnabled && isClerkConfigured) ? userResult.user : null;
@@ -84,10 +73,9 @@ export default function Sidebar() {
   const navItems = [
     { href: '/', label: 'Overview', icon: 'fas fa-tachometer-alt' },
     { href: '/automations', label: 'Automations', icon: 'fas fa-robot' },
-    { href: '/updates', label: 'Updates', icon: 'fas fa-clock' },
-    { href: '/tasks', label: 'Tasks', icon: 'fas fa-tasks' },
+    { href: '/updates', label: 'Timeline', icon: 'fas fa-stream' },
+    { href: '/files', label: 'Files', icon: 'fas fa-folder' },
     { href: '/referrals', label: 'Refer & Win', icon: 'fas fa-gift' },
-    { href: '/test-page', label: 'Test Page', icon: 'fas fa-flask' },
   ];
 
   // Handle sign out
@@ -184,64 +172,96 @@ export default function Sidebar() {
         </nav>
       </div>
 
-      {/* User Profile Section */}
-      <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.1)', paddingTop: '24px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
-          <div
-            style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '50%',
-              backgroundColor: '#CD1174',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginRight: '12px',
-              fontSize: '18px',
-              fontWeight: 'bold',
-              color: 'white',
-            }}
-          >
-            {getUserInitials()}
+      {/* Bottom Section */}
+      <div>
+        {/* User Profile Section */}
+        <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.1)', paddingTop: '24px' }}>
+          {/* Get Support Button - Moved below divider line */}
+          <div style={{ marginBottom: '16px' }}>
+            <button
+              style={{
+                width: '100%',
+                backgroundColor: '#f1f5f9',
+                color: '#475569',
+                fontWeight: 600,
+                padding: '12px',
+                borderRadius: '8px',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = '#e2e8f0';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = '#f1f5f9';
+              }}
+            >
+              <i className="fas fa-life-ring" style={{ marginRight: '8px' }}></i>
+              Get Support
+            </button>
           </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ color: 'white', fontWeight: 600, fontSize: '14px' }}>
-              {getUserDisplayName()}
+          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
+            <div
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                backgroundColor: '#CD1174',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginRight: '12px',
+                fontSize: '18px',
+                fontWeight: 'bold',
+                color: 'white',
+              }}
+            >
+              {getUserInitials()}
             </div>
-            <div style={{ color: '#9CA3AF', fontSize: '12px' }}>
-              {getUserEmail()}
+            <div style={{ flex: 1 }}>
+              <div style={{ color: 'white', fontWeight: 600, fontSize: '14px' }}>
+                {getUserDisplayName()}
+              </div>
+              <div style={{ color: '#9CA3AF', fontSize: '12px' }}>
+                {getUserEmail()}
+              </div>
             </div>
           </div>
+          
+          {/* Sign Out Button - only show if auth is enabled */}
+          {isAuthEnabled && isClerkConfigured && (
+            <button
+              onClick={handleSignOut}
+              style={{
+                width: '100%',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                color: '#9CA3AF',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '12px',
+                fontWeight: 500,
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+                e.target.style.color = 'white';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                e.target.style.color = '#9CA3AF';
+              }}
+            >
+              Sign Out
+            </button>
+          )}
         </div>
-        
-        {/* Sign Out Button - only show if auth is enabled */}
-        {isAuthEnabled && isClerkConfigured && (
-          <button
-            onClick={handleSignOut}
-            style={{
-              width: '100%',
-              padding: '8px 16px',
-              borderRadius: '8px',
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              color: '#9CA3AF',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: '12px',
-              fontWeight: 500,
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
-              e.target.style.color = 'white';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-              e.target.style.color = '#9CA3AF';
-            }}
-          >
-            Sign Out
-          </button>
-        )}
       </div>
     </aside>
   );
