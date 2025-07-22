@@ -431,20 +431,13 @@ export default function AutomationsPage() {
 
                         const statusStyling = getStatusStyling(project.status);
 
-                        // Get next milestone text
-                        const getNextMilestone = (status: string, progress: number) => {
-                            if (progress === 100) return 'Completed';
-                            if (status === 'Live') return 'Operational';
-                            if (status === 'Quality Control') return 'Final Deployment';
-                            if (status === 'Building') return 'Quality Testing';
-                            if (status === 'Planning') return 'Development Start';
-                            return 'Next Phase';
+                        // Get estimated completion date
+                        const getEstimatedCompletion = (project: Project) => {
+                            return formatDeadline(project.deadline);
                         };
 
-                        // Get button text
-                        const getButtonText = (status: string, progress: number) => {
-                            if (progress === 100) return 'View Summary';
-                            if (status === 'Live') return 'View Performance';
+                        // Get button text - always View Details
+                        const getButtonText = () => {
                             return 'View Details';
                         };
 
@@ -492,20 +485,17 @@ export default function AutomationsPage() {
                                 <div className="flex justify-between items-end mt-4 border-t border-slate-200 pt-4">
                                     <div>
                                         <p className="text-xs text-slate-500">
-                                            {progress.percentage === 100 ? 'Estimated Completion' : 'Next Milestone'}
+                                            {'Estimated Completion'}
                                         </p>
                                         <p className="font-semibold text-slate-700">
-                                            {progress.percentage === 100
-                                                ? formatDeadline(project.deadline)
-                                                : getNextMilestone(project.status, progress.percentage)
-                                            }
+                                            {getEstimatedCompletion(project)}
                                         </p>
                                     </div>
                                     <Link
                                         href={`/projects/${project.id}`}
                                         className="bg-pink-600 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-pink-700 transition-colors"
                                     >
-                                        {getButtonText(project.status, progress.percentage)}
+                                        {getButtonText()}
                                     </Link>
                                 </div>
                             </div>
